@@ -1,0 +1,25 @@
+# =======================================================
+# Cloudflare Worker & Static Assets Configuration
+# =======================================================
+name = "fallen-75-france"
+main = "worker.ts"
+compatibility_date = "2024-09-01"
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+
+# Cloudflare D1 Database (Persistance SQL des morceaux, prix, commandes)
+[[d1_databases]]
+binding = "DB"
+database_name = "fallen75-db"
+database_id = "812c3d47-fcbe-44fa-91ab-e5514cc5c7e5"
+
+# Cloudflare R2 Storage (Stockage permanent illimité des fichiers MP3, WAV et Images)
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "music-2026"
+
+[vars]
+CF_R2_PUBLIC_URL = "https://pub-32ecd1e71ab848fdacff0b89e5c8bb4e.r2.dev"
+ADMIN_PASSWORD = "FALLEN2026AA"

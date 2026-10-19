@@ -1,0 +1,14 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+.wrangler/
+server/data/
+*.sqlite
+*.db
+bun.lock
+bun.lockb
