@@ -12,3 +12,4 @@ server/data/
 *.db
 bun.lock
 bun.lockb
+*.zip
