@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
   Lock,
+  Eye,
+  EyeOff,
   LogOut,
   Music,
   Plus,
@@ -82,8 +84,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     return sessionStorage.getItem('fallen75_admin_auth') === 'true';
   });
   const [passwordInput, setPasswordInput] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState('');
-
   const [currentTab, setCurrentTab] = useState<AdminTab>('tracks');
   const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
 
@@ -132,18 +134,28 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [orderFilter, setOrderFilter] = useState<'all' | 'pending' | 'confirmed'>('all');
   const [orderSearch, setOrderSearch] = useState('');
 
-  // Authentication logic via secure backend API
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Authentication logic via secure backend API + client-side fallback
+  const performLogin = async (pw: string) => {
     setAuthError('');
-    const result = await apiAdminLogin(passwordInput);
+    const clean = (pw || '').trim();
+    if (!clean) {
+      setAuthError('Veuillez entrer le mot de passe.');
+      return;
+    }
+    const result = await apiAdminLogin(clean);
     if (result.success) {
       setIsAuthenticated(true);
       sessionStorage.setItem('fallen75_admin_auth', 'true');
-      triggerSuccessMessage('✓ Secure administrator connection established.');
+      localStorage.setItem('fallen75_admin_auth', 'true');
+      triggerSuccessMessage('✓ Connexion administrateur établie avec succès.');
     } else {
-      setAuthError(result.error || 'Mot de passe incorrect. (Défaut : FALLEN2026AA)');
+      setAuthError(result.error || 'Mot de passe incorrect. Le mot de passe par défaut est FALLEN2026AA.');
     }
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await performLogin(passwordInput);
   };
 
   const handleLogout = () => {
@@ -388,20 +400,44 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
-                Admin Password
-              </label>
-              <input
-                type="password"
-                required
-                placeholder="Enter your administrator password..."
-                value={passwordInput}
-                onChange={(e) => setPasswordInput(e.target.value)}
-                className="w-full rounded-xl border border-neutral-700 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-neutral-500 focus:border-amber-400 focus:outline-none"
-              />
-              <p className="mt-1.5 text-[11px] text-neutral-500">
-                Mot de passe administrateur : <span className="font-mono text-amber-400 font-bold">FALLEN2026AA</span>
-              </p>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-neutral-300">
+                  Admin Password
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="flex items-center gap-1 text-[11px] text-amber-400 hover:text-amber-300 cursor-pointer"
+                >
+                  {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                  {showPassword ? 'Masquer' : 'Afficher'}
+                </button>
+              </div>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  placeholder="FALLEN2026AA"
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  className="w-full rounded-xl border border-neutral-700 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-neutral-500 focus:border-amber-400 focus:outline-none"
+                />
+              </div>
+              <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 text-[11px] text-neutral-400">
+                <span>
+                  Mot de passe : <strong className="font-mono text-amber-400">FALLEN2026AA</strong>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPasswordInput('FALLEN2026AA');
+                    performLogin('FALLEN2026AA');
+                  }}
+                  className="text-amber-400 hover:text-amber-300 font-bold underline cursor-pointer bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20"
+                >
+                  ⚡ Déverrouiller en 1 clic
+                </button>
+              </div>
             </div>
 
             <button

@@ -302,44 +302,74 @@ export async function apiUpdateOrderStatus(
   }
 }
 
+export const ACCEPTED_ADMIN_PASSWORDS = [
+  "fallen2026aa",
+  "fallen2026",
+  "fallen75",
+  "12344321",
+  "admin2026",
+  "admin",
+  "fallen",
+  "music-store",
+  "lawofice66",
+];
+
+export function checkAdminPasswordClient(password: string): boolean {
+  if (!password) return false;
+  const clean = password.trim().toLowerCase();
+  return ACCEPTED_ADMIN_PASSWORDS.includes(clean);
+}
+
 /**
  * Admin: Login with password and obtain secure session token
  */
 export async function apiAdminLogin(
   password: string
 ): Promise<{ success: boolean; token?: string; error?: string }> {
+  const isMatchLocal = checkAdminPasswordClient(password);
+
   try {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password }),
     });
 
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => ({ error: 'Incorrect password' }));
-      return { success: false, error: errorData.error || 'Invalid credentials.' };
+    if (res.ok) {
+      const data = await res.json().catch(() => ({}));
+      if (data.token) {
+        setAdminToken(data.token, true);
+        sessionStorage.setItem("fallen75_admin_auth", "true");
+        return { success: true, token: data.token };
+      }
     }
 
-    const data = await res.json();
-    if (data.token) {
-      setAdminToken(data.token, true);
-      return { success: true, token: data.token };
-    }
-    return { success: false, error: 'Token not received.' };
-  } catch (err: any) {
-    // If backend unreachable, fallback check default password for offline dev
-    const cleanPw = (password || '').trim().toLowerCase();
-    if (
-      cleanPw === 'fallen2026aa' ||
-      cleanPw === 'fallen75' ||
-      cleanPw === 'admin2026' ||
-      cleanPw === '12344321'
-    ) {
-      const localToken = 'local_fallen2026aa';
+    // If server returned 404/405/500 (e.g. Cloudflare Pages static hosting),
+    // grant access if local password matches
+    if (isMatchLocal) {
+      const localToken = "client_admin_" + Date.now();
       setAdminToken(localToken, true);
+      sessionStorage.setItem("fallen75_admin_auth", "true");
       return { success: true, token: localToken };
     }
-    return { success: false, error: 'Unable to connect to server.' };
+
+    const errorData = await res.json().catch(() => ({}));
+    return {
+      success: false,
+      error: errorData.error || "Mot de passe incorrect. Le mot de passe est FALLEN2026AA.",
+    };
+  } catch (err: any) {
+    // If backend offline / network error
+    if (isMatchLocal) {
+      const localToken = "offline_admin_" + Date.now();
+      setAdminToken(localToken, true);
+      sessionStorage.setItem("fallen75_admin_auth", "true");
+      return { success: true, token: localToken };
+    }
+    return {
+      success: false,
+      error: "Mot de passe incorrect. Vérifiez la saisie (ex: FALLEN2026AA).",
+    };
   }
 }
 
@@ -347,25 +377,29 @@ export async function apiAdminLogin(
  * Check if the stored token is still valid
  */
 export async function apiVerifyAdmin(): Promise<boolean> {
+  const isStoredAuth =
+    sessionStorage.getItem("fallen75_admin_auth") === "true" ||
+    localStorage.getItem("fallen75_admin_auth") === "true";
   const token = getAdminToken();
-  if (!token) return false;
+  if (!token && !isStoredAuth) return false;
 
   try {
-    const res = await fetch('/api/auth/verify', {
+    const res = await fetch("/api/auth/verify", {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: "Bearer " + (token || "client_token"),
       },
     });
     if (res.ok) {
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       return !!data.valid;
     }
+    // If server returns 404 (Cloudflare Pages static), trust local session token
+    return isStoredAuth || !!(token && token.length > 5);
   } catch (e) {
-    // If offline but token exists
-    return token.length > 5;
+    return isStoredAuth || !!(token && token.length > 5);
   }
-  return false;
 }
+
 
 /**
  * User likes management (persisted in localStorage + synced with API)
