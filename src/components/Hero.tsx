@@ -23,6 +23,12 @@ interface HeroProps {
   onTagSelect: (tag: string) => void;
   availableTags: string[];
   totalTracks: number;
+  unreleasedCount?: number;
+  releasedCount?: number;
+  instrumentalsCount?: number;
+  acapellaCount?: number;
+  frenchCount?: number;
+  englishCount?: number;
   likedCount?: number;
   onOpenContact?: () => void;
 }
@@ -34,6 +40,12 @@ export const Hero: React.FC<HeroProps> = ({
   onTagSelect,
   availableTags,
   totalTracks,
+  unreleasedCount = 51,
+  releasedCount = 89,
+  instrumentalsCount = 30,
+  acapellaCount = 18,
+  frenchCount = 33,
+  englishCount = 59,
   likedCount = 0,
   onOpenContact,
 }) => {
@@ -161,22 +173,106 @@ export const Hero: React.FC<HeroProps> = ({
 
         {/* Filter and Search Bar */}
         <div className="mt-8 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 pt-6 border-t border-neutral-800/80">
-          {/* Tag Pills */}
+          {/* Tag & Category Pills */}
           <div className="flex flex-wrap items-center gap-1.5">
+            {/* All Tracks */}
             <button
+              id="filter-btn-all"
               onClick={() => onTagSelect('all')}
-              className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all ${
+              className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                 selectedTag === 'all'
                   ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
                   : 'bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800 border border-neutral-800'
               }`}
             >
-              All Beats ({totalTracks})
+              🌟 All Beats ({totalTracks})
             </button>
 
+            {/* Inédites / Unreleased ($2.49) */}
             <button
+              id="filter-btn-unreleased"
+              onClick={() => onTagSelect('unreleased')}
+              className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                selectedTag === 'unreleased'
+                  ? 'bg-emerald-500 text-black shadow-md shadow-emerald-500/25 ring-2 ring-emerald-400'
+                  : 'bg-emerald-950/40 text-emerald-300 hover:text-white hover:bg-emerald-900/60 border border-emerald-500/40'
+              }`}
+            >
+              <span>🟢 Inédites ({unreleasedCount})</span>
+              <span className="text-[10px] bg-emerald-400/20 text-emerald-200 px-1.5 py-0.2 rounded font-mono font-black">$2.49</span>
+            </button>
+
+            {/* Released ($0.99) */}
+            <button
+              id="filter-btn-released"
+              onClick={() => onTagSelect('released')}
+              className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                selectedTag === 'released'
+                  ? 'bg-rose-500 text-white shadow-md shadow-rose-500/25 ring-2 ring-rose-400'
+                  : 'bg-rose-950/40 text-rose-300 hover:text-white hover:bg-rose-900/60 border border-rose-500/40'
+              }`}
+            >
+              <span>🔴 Released ({releasedCount})</span>
+              <span className="text-[10px] bg-rose-400/20 text-rose-200 px-1.5 py-0.2 rounded font-mono font-black">$0.99</span>
+            </button>
+
+            {/* Instrumentales */}
+            <button
+              id="filter-btn-instrumentals"
+              onClick={() => onTagSelect('instrumentals')}
+              className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                selectedTag === 'instrumentals'
+                  ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
+                  : 'bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800 border border-neutral-800'
+              }`}
+            >
+              🎹 Instrumentales ({instrumentalsCount})
+            </button>
+
+            {/* Acapella */}
+            <button
+              id="filter-btn-acapella"
+              onClick={() => onTagSelect('acapella')}
+              className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                selectedTag === 'acapella'
+                  ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
+                  : 'bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800 border border-neutral-800'
+              }`}
+            >
+              🎙️ Acapella ({acapellaCount})
+            </button>
+
+            {/* French */}
+            <button
+              id="filter-btn-french"
+              onClick={() => onTagSelect('french')}
+              className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                selectedTag === 'french'
+                  ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
+                  : 'bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800 border border-neutral-800'
+              }`}
+            >
+              🇫🇷 Français ({frenchCount})
+            </button>
+
+            {/* English */}
+            <button
+              id="filter-btn-english"
+              onClick={() => onTagSelect('english')}
+              className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                selectedTag === 'english'
+                  ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
+                  : 'bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800 border border-neutral-800'
+              }`}
+            >
+              🇬🇧 English ({englishCount})
+            </button>
+
+            {/* Favorites */}
+            <button
+              id="filter-btn-favorites"
               onClick={() => onTagSelect('favorites')}
-              className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 selectedTag === 'favorites'
                   ? 'bg-red-500 text-white shadow-md shadow-red-500/20'
                   : 'bg-neutral-900 text-neutral-300 hover:text-white hover:bg-neutral-800 border border-neutral-800'
@@ -184,20 +280,6 @@ export const Hero: React.FC<HeroProps> = ({
             >
               <span className="text-red-400">♥</span> Favoris ({likedCount})
             </button>
-
-            {availableTags.map((tag) => (
-              <button
-                key={tag}
-                onClick={() => onTagSelect(tag)}
-                className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all ${
-                  selectedTag === tag
-                    ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
-                    : 'bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800 border border-neutral-800'
-                }`}
-              >
-                #{tag}
-              </button>
-            ))}
           </div>
 
           {/* Search Input */}

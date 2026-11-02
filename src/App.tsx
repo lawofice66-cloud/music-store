@@ -134,6 +134,14 @@ export default function App() {
     return Array.from(tagSet);
   }, [tracks]);
 
+  // Specific counts for Inédites (Unreleased) vs Released and categories
+  const unreleasedTracks = useMemo(() => tracks.filter((t) => (t.status || '').toLowerCase() === 'unreleased'), [tracks]);
+  const releasedTracks = useMemo(() => tracks.filter((t) => (t.status || '').toLowerCase() !== 'unreleased'), [tracks]);
+  const instrumentalsTracks = useMemo(() => tracks.filter((t) => (t.category || '').toLowerCase() === 'instrumentale' || t.tags?.some(tag => tag.toLowerCase().includes('instrument'))), [tracks]);
+  const acapellaTracks = useMemo(() => tracks.filter((t) => (t.category || '').toLowerCase() === 'accapella' || t.tags?.some(tag => tag.toLowerCase().includes('acap') || tag.toLowerCase().includes('accap'))), [tracks]);
+  const frenchTracks = useMemo(() => tracks.filter((t) => (t.category || '').toLowerCase() === 'francais' || t.tags?.some(tag => tag.toLowerCase().includes('francais') || tag.toLowerCase().includes('french'))), [tracks]);
+  const englishTracks = useMemo(() => tracks.filter((t) => (t.category || '').toLowerCase() === 'anglais' || t.tags?.some(tag => tag.toLowerCase().includes('anglais') || tag.toLowerCase().includes('english'))), [tracks]);
+
   // Filtered & Sorted tracks
   const filteredTracks = useMemo(() => {
     const list = tracks.filter((t) => {
@@ -142,6 +150,18 @@ export default function App() {
         matchesTag = true;
       } else if (selectedTag === 'favorites') {
         matchesTag = likedTrackIds.has(t.id);
+      } else if (selectedTag === 'unreleased') {
+        matchesTag = (t.status || '').toLowerCase() === 'unreleased';
+      } else if (selectedTag === 'released') {
+        matchesTag = (t.status || '').toLowerCase() !== 'unreleased';
+      } else if (selectedTag === 'instrumentals') {
+        matchesTag = (t.category || '').toLowerCase() === 'instrumentale' || t.tags?.some(tag => tag.toLowerCase().includes('instrument'));
+      } else if (selectedTag === 'acapella') {
+        matchesTag = (t.category || '').toLowerCase() === 'accapella' || t.tags?.some(tag => tag.toLowerCase().includes('acap') || tag.toLowerCase().includes('accap'));
+      } else if (selectedTag === 'french') {
+        matchesTag = (t.category || '').toLowerCase() === 'francais' || t.tags?.some(tag => tag.toLowerCase().includes('francais') || tag.toLowerCase().includes('french'));
+      } else if (selectedTag === 'english') {
+        matchesTag = (t.category || '').toLowerCase() === 'anglais' || t.tags?.some(tag => tag.toLowerCase().includes('anglais') || tag.toLowerCase().includes('english'));
       } else {
         matchesTag = !!t.tags?.some((tag) => tag.toLowerCase() === selectedTag.toLowerCase());
       }
@@ -354,6 +374,12 @@ export default function App() {
             onTagSelect={setSelectedTag}
             availableTags={availableTags}
             totalTracks={tracks.length}
+            unreleasedCount={unreleasedTracks.length}
+            releasedCount={releasedTracks.length}
+            instrumentalsCount={instrumentalsTracks.length}
+            acapellaCount={acapellaTracks.length}
+            frenchCount={frenchTracks.length}
+            englishCount={englishTracks.length}
             likedCount={likedTrackIds.size}
             onOpenContact={() => setIsContactModalOpen(true)}
           />
@@ -419,6 +445,102 @@ export default function App() {
                 >
                   Afficher tout le catalogue
                 </button>
+              </div>
+            ) : selectedTag === 'all' && !searchQuery ? (
+              <div className="space-y-12">
+                {/* SECTION 1: INÉDITES (UNRELEASED) */}
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-gradient-to-r from-emerald-950/60 to-emerald-900/20 border border-emerald-500/40">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 text-lg font-black border border-emerald-500/40">
+                        🟢
+                      </span>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-xl font-black text-white font-['Plus_Jakarta_Sans']">
+                            Morceaux Inédits (Unreleased)
+                          </h3>
+                          <span className="rounded-full bg-emerald-400/20 text-emerald-300 font-mono text-xs px-2.5 py-0.5 font-extrabold border border-emerald-400/30">
+                            {unreleasedTracks.length} Titres
+                          </span>
+                        </div>
+                        <p className="text-xs text-emerald-200/80 mt-0.5">
+                          Enregistrements studio inédits, non parus sur les plateformes • Licence Master Exclusive : <strong className="text-emerald-300 font-mono">$2.49 USD</strong>
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTag('unreleased')}
+                      className="self-start sm:self-auto rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black px-4 py-2 text-xs font-bold transition-all shadow-md cursor-pointer shrink-0"
+                    >
+                      Voir uniquement les Inédites ({unreleasedTracks.length})
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {unreleasedTracks.map((track) => (
+                      <TrackCard
+                        key={track.id}
+                        track={track}
+                        isPlaying={audioState.isPlaying && audioState.trackId === track.id}
+                        currentTime={audioState.trackId === track.id ? audioState.currentTime : 0}
+                        duration={audioState.trackId === track.id ? audioState.duration : 30}
+                        isLiked={likedTrackIds.has(track.id)}
+                        onTogglePlay={handleTogglePlay}
+                        onToggleLike={handleToggleLike}
+                        onBuy={(t) => setSelectedTrackForBuy(t)}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* SECTION 2: RELEASED */}
+                <div className="space-y-6 pt-4 border-t border-neutral-800/80">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-gradient-to-r from-rose-950/60 to-rose-900/20 border border-rose-500/40">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/20 text-rose-400 text-lg font-black border border-rose-500/40">
+                        🔴
+                      </span>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-xl font-black text-white font-['Plus_Jakarta_Sans']">
+                            Catalogue Released (Morceaux Sortis)
+                          </h3>
+                          <span className="rounded-full bg-rose-400/20 text-rose-300 font-mono text-xs px-2.5 py-0.5 font-extrabold border border-rose-400/30">
+                            {releasedTracks.length} Titres
+                          </span>
+                        </div>
+                        <p className="text-xs text-rose-200/80 mt-0.5">
+                          Productions officielles parues sur les plateformes • Tarifs : <strong className="text-amber-300 font-mono">MP3 $0.99 USD</strong> • <strong className="text-cyan-300 font-mono">WAV $2.49 USD</strong>
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTag('released')}
+                      className="self-start sm:self-auto rounded-xl bg-rose-500 hover:bg-rose-400 text-white px-4 py-2 text-xs font-bold transition-all shadow-md cursor-pointer shrink-0"
+                    >
+                      Voir uniquement les Released ({releasedTracks.length})
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {releasedTracks.map((track) => (
+                      <TrackCard
+                        key={track.id}
+                        track={track}
+                        isPlaying={audioState.isPlaying && audioState.trackId === track.id}
+                        currentTime={audioState.trackId === track.id ? audioState.currentTime : 0}
+                        duration={audioState.trackId === track.id ? audioState.duration : 30}
+                        isLiked={likedTrackIds.has(track.id)}
+                        onTogglePlay={handleTogglePlay}
+                        onToggleLike={handleToggleLike}
+                        onBuy={(t) => setSelectedTrackForBuy(t)}
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -56,19 +56,24 @@ export const TrackCard: React.FC<TrackCardProps> = ({
           {/* Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-          {/* Badge BPM, Key & File Size */}
+          {/* Badge Status (Inédite vs Released), BPM, Key & File Size */}
           <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
-            <span className="rounded-md bg-black/75 backdrop-blur-md px-2.5 py-1 text-xs font-mono font-bold text-amber-400 border border-amber-500/30">
-              {track.bpm} BPM
-            </span>
-            <span className="rounded-md bg-black/75 backdrop-blur-md px-2 py-1 text-xs font-mono font-semibold text-neutral-300 border border-neutral-700">
-              {track.key}
-            </span>
-            {track.fileSize && (
-              <span className="rounded-md bg-black/75 backdrop-blur-md px-2 py-1 text-xs font-mono font-semibold text-emerald-400 border border-emerald-500/30">
-                {track.fileSize}
+            {track.status === 'unreleased' ? (
+              <span className="rounded-md bg-emerald-500 text-black px-2 py-0.5 text-[11px] font-black tracking-wide shadow-md flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-black animate-pulse" />
+                INÉDITE ($2.49)
+              </span>
+            ) : (
+              <span className="rounded-md bg-rose-500 text-white px-2 py-0.5 text-[11px] font-black tracking-wide shadow-md flex items-center gap-1">
+                RELEASED ($0.99)
               </span>
             )}
+            <span className="rounded-md bg-black/75 backdrop-blur-md px-2 py-0.5 text-xs font-mono font-bold text-amber-400 border border-amber-500/30">
+              {track.bpm} BPM
+            </span>
+            <span className="rounded-md bg-black/75 backdrop-blur-md px-2 py-0.5 text-xs font-mono font-semibold text-neutral-300 border border-neutral-700">
+              {track.key}
+            </span>
           </div>
 
           {/* Top Right Badges: HOT & Like Button */}
@@ -190,28 +195,53 @@ export const TrackCard: React.FC<TrackCardProps> = ({
 
         {/* Price & Buy Now Button */}
         <div className="flex items-center justify-between gap-3 pt-1">
-          <div>
-            <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-400 block mb-0.5">
-              Available Formats
-            </span>
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="inline-flex items-center text-xs sm:text-sm font-extrabold font-mono text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-lg border border-amber-500/30">
-                MP3 $0.99
+          {track.status === 'unreleased' ? (
+            <div>
+              <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 block mb-0.5">
+                🟢 Morceau Inédit (Unreleased)
               </span>
-              <span className="text-neutral-500 text-xs">•</span>
-              <span className="inline-flex items-center text-xs sm:text-sm font-extrabold font-mono text-cyan-400 bg-cyan-500/15 px-2 py-0.5 rounded-lg border border-cyan-500/30">
-                WAV $2.49
-              </span>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="inline-flex items-center text-xs sm:text-sm font-extrabold font-mono text-emerald-300 bg-emerald-500/15 px-2.5 py-0.5 rounded-lg border border-emerald-500/40">
+                  Inédite Master $2.49 USD
+                </span>
+              </div>
             </div>
-          </div>
-          <button
-            id={`buy-btn-${track.id}`}
-            onClick={() => onBuy(track)}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 px-4 py-2.5 text-xs sm:text-sm font-bold text-black shadow-lg shadow-amber-500/20 hover:from-amber-400 hover:to-amber-300 active:scale-95 transition-all cursor-pointer shrink-0"
-          >
-            <ShoppingCart className="h-4 w-4 fill-black/30" />
-            <span>Buy Now</span>
-          </button>
+          ) : (
+            <div>
+              <span className="text-[10px] uppercase font-bold tracking-wider text-rose-400 block mb-0.5">
+                🔴 Morceau Sorti (Released)
+              </span>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="inline-flex items-center text-xs sm:text-sm font-extrabold font-mono text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-lg border border-amber-500/30">
+                  MP3 $0.99
+                </span>
+                <span className="text-neutral-500 text-xs">•</span>
+                <span className="inline-flex items-center text-xs sm:text-sm font-extrabold font-mono text-cyan-400 bg-cyan-500/15 px-2 py-0.5 rounded-lg border border-cyan-500/30">
+                  WAV $2.49
+                </span>
+              </div>
+            </div>
+          )}
+
+          {track.status === 'unreleased' ? (
+            <button
+              id={`buy-btn-${track.id}`}
+              onClick={() => onBuy(track)}
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 px-4 py-2.5 text-xs sm:text-sm font-bold text-black shadow-lg shadow-emerald-500/25 hover:from-emerald-400 hover:to-emerald-300 active:scale-95 transition-all cursor-pointer shrink-0"
+            >
+              <ShoppingCart className="h-4 w-4 fill-black/30" />
+              <span>Buy Inédite ($2.49)</span>
+            </button>
+          ) : (
+            <button
+              id={`buy-btn-${track.id}`}
+              onClick={() => onBuy(track)}
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 px-4 py-2.5 text-xs sm:text-sm font-bold text-black shadow-lg shadow-amber-500/20 hover:from-amber-400 hover:to-amber-300 active:scale-95 transition-all cursor-pointer shrink-0"
+            >
+              <ShoppingCart className="h-4 w-4 fill-black/30" />
+              <span>Buy Now ($0.99)</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

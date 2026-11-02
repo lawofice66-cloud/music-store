@@ -4,6 +4,9 @@ export interface Track {
   description: string;
   price: number;
   currency: string;
+  status?: 'released' | 'unreleased';
+  category?: string;
+  type?: string;
   mp3Price?: number;
   wavPrice?: number;
   bpm: number;

@@ -28,30 +28,51 @@ def main():
 
     print(f"Loaded {len(seeded_tracks)} tracks from seeded json.")
 
+    # Sort tracks so that all Inédites (Unreleased) are first, followed by all Released tracks
+    unreleased_raw = [t for t in seeded_tracks if (t.get('status') or '').lower() == 'unreleased']
+    released_raw = [t for t in seeded_tracks if (t.get('status') or '').lower() != 'unreleased']
+
+    print(f"Counts: {len(unreleased_raw)} Inédites (Unreleased), {len(released_raw)} Released.")
+
+    sorted_raw = unreleased_raw + released_raw
     normalized_tracks = []
-    for idx, t in enumerate(seeded_tracks):
+
+    for idx, t in enumerate(sorted_raw):
         tid = t.get('id') or f"track-{idx+1}"
         title = t.get('title', f"Track {idx+1}")
-        category = t.get('category') or ('French Urban' if t.get('language') == 'fr' else 'Trap')
-        tags = t.get('tags')
-        if not tags or not isinstance(tags, list):
-            tags = ['Studio Master', category.capitalize()]
+        category = t.get('category') or ('francais' if t.get('language') == 'fr' else 'anglais')
+        status = 'unreleased' if (t.get('status') or '').lower() == 'unreleased' else 'released'
         
         cover = t.get('coverImage') or t.get('cover') or COVERS[idx % len(COVERS)]
-        
-        bpm = t.get('bpm', 130 + (idx % 20))
-        key = t.get('key', 'D Minor')
-        
+        bpm = t.get('bpm') or (130 + (idx % 20))
+        key = t.get('key') or 'D Minor'
         audio_url = t.get('audioPreviewUrl') or f"https://music.fallen75.com/mp3/{title}.mp3"
-        desc = t.get('description') or f"HQ Studio Master • 320kbps MP3 ($0.99) & 24-bit WAV ($2.49) • {category}"
         
+        if status == 'unreleased':
+            price = 2.49
+            mp3_price = 2.49
+            wav_price = 2.49
+            tag_status = 'Inédite'
+            desc = t.get('description') or f"HQ Studio Master • Morceau Inédit (Unreleased) • Licence Exclusive $2.49 USD"
+            tags = ['Inédite', 'Unreleased', category.capitalize(), 'Studio Master']
+        else:
+            price = 0.99
+            mp3_price = 0.99
+            wav_price = 2.49
+            tag_status = 'Released'
+            desc = t.get('description') or f"HQ Studio Master • Morceau Sorti (Released) • MP3 $0.99 / WAV $2.49"
+            tags = ['Released', category.capitalize(), 'Studio Master']
+
         norm = {
             "id": tid,
             "title": title,
             "description": desc,
-            "price": 0.99,
-            "mp3Price": 0.99,
-            "wavPrice": 2.49,
+            "status": status,
+            "category": category,
+            "type": t.get('type') or 'vocal',
+            "price": price,
+            "mp3Price": mp3_price,
+            "wavPrice": wav_price,
             "currency": "$",
             "bpm": bpm,
             "key": key,
@@ -60,7 +81,7 @@ def main():
             "audioPreviewUrl": audio_url,
             "audioPreset": "drill_dark",
             "downloadFileName": f"{title}.wav",
-            "fileSize": "45 MB",
+            "fileSize": "45 MB" if status == 'unreleased' else "35 MB",
             "featured": bool(t.get('featured', idx < 6)),
             "likes": int(t.get('likes') or (120 + (idx * 7) % 250)),
             "plays": int(t.get('plays') or t.get('views') or (900 + (idx * 23) % 2500))
@@ -79,6 +100,7 @@ def main():
     # 2. Update src/data/tracksData.ts
     tracks_ts_content = "import { Track } from '../types';\n\n"
     tracks_ts_content += "// Full official catalog of 140 beats and instrumentals for FALLEN 75 FRANCE\n"
+    tracks_ts_content += "// 51 Inédites (Unreleased) @ $2.49 USD + 89 Released @ $0.99 USD (MP3) / $2.49 USD (WAV)\n"
     tracks_ts_content += "export const GLOBAL_TRACKS_CATALOG: Track[] = " + json.dumps(normalized_tracks, indent=2, ensure_ascii=False) + ";\n"
     
     with open(TRACKS_DATA_PATH, 'w', encoding='utf-8') as f:

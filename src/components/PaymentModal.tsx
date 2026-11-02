@@ -47,9 +47,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   onSubmitOrder,
   onViewOrder,
 }) => {
-  if (!isOpen) return null;
-
-  const [selectedFormat, setSelectedFormat] = useState<'mp3' | 'wav'>('mp3');
+  const isUnreleased = track.status === 'unreleased';
+  const [selectedFormat, setSelectedFormat] = useState<'mp3' | 'wav'>(isUnreleased ? 'wav' : 'mp3');
   const [activeTab, setActiveTab] = useState<TabType>('nowpayments');
   const [selectedCrypto, setSelectedCrypto] = useState<CryptoKey>('usdtTron');
   const [selectedOther, setSelectedOther] = useState<OtherKey>('skrill');
@@ -57,9 +56,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [copiedMessage, setCopiedMessage] = useState<string | null>(null);
 
-  const currentPrice = selectedFormat === 'wav' ? (track.wavPrice || 2.49) : (track.mp3Price || track.price || 0.99);
+  const currentPrice = isUnreleased
+    ? 2.49
+    : (selectedFormat === 'wav' ? (track.wavPrice || 2.49) : (track.mp3Price || track.price || 0.99));
   const currentCurrency = track.currency === '€' ? '$' : (track.currency || '$');
-  const licenseLabel = selectedFormat === 'wav' ? 'WAV Studio Master ($2.49)' : 'MP3 License ($0.99)';
+  const licenseLabel = isUnreleased
+    ? 'Inédite Studio Master ($2.49)'
+    : (selectedFormat === 'wav' ? 'WAV Studio Master ($2.49)' : 'MP3 License ($0.99)');
 
   // Form states
   const [clientEmail, setClientEmail] = useState('');
@@ -291,74 +294,107 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         ) : (
           /* PAYMENT SELECTION & PROOF FORM */
           <div className="p-5 sm:p-6 space-y-6">
-            {/* Step 1: License Format Choice (MP3 $0.99 vs WAV $2.49) */}
+            {/* Step 1: License Format Choice */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  <span>Step 1: Choose License Format</span>
-                </label>
-                <span className="text-[11px] font-mono text-neutral-400">
-                  Selected: <span className="font-bold text-white">{selectedFormat.toUpperCase()} (${currentPrice.toFixed(2)})</span>
-                </span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* MP3 Option */}
-                <button
-                  type="button"
-                  id="select-format-mp3"
-                  onClick={() => setSelectedFormat('mp3')}
-                  className={`flex items-start justify-between p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
-                    selectedFormat === 'mp3'
-                      ? 'border-amber-400 bg-amber-500/15 ring-2 ring-amber-400/40 shadow-lg shadow-amber-500/10'
-                      : 'border-neutral-800 bg-[#0d0f17] hover:border-neutral-700 hover:bg-neutral-900'
-                  }`}
-                >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-black text-white">MP3 License</span>
-                      <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-mono font-bold text-amber-400 border border-amber-500/30">
-                        320 kbps
-                      </span>
+              {isUnreleased ? (
+                <>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
+                      <span>Step 1: Licence Morceau Inédit (Unreleased)</span>
+                    </label>
+                    <span className="text-[11px] font-mono text-emerald-300">
+                      Tarif Inédite: <span className="font-bold text-white font-mono">$2.49 USD</span>
+                    </span>
+                  </div>
+                  <div className="p-4 rounded-xl border border-emerald-500/50 bg-gradient-to-r from-emerald-950/40 to-emerald-900/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg shadow-emerald-950/20">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-black text-white">🟢 Inédite Studio Master Package</span>
+                        <span className="rounded bg-emerald-500/20 px-2 py-0.5 text-[10px] font-mono font-bold text-emerald-400 border border-emerald-500/40">
+                          24-bit Lossless WAV + MP3 320kbps
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-emerald-200/80 leading-snug">
+                        Production inédite non parue sur les plateformes. Droit d'utilisation complet (Streaming, YouTube, Radio, TV).
+                      </p>
                     </div>
-                    <p className="text-[11px] text-neutral-400 leading-snug">
-                      High-quality MP3 for streaming, YouTube & mixtapes
-                    </p>
+                    <div className="text-right shrink-0">
+                      <div className="text-xl font-black font-mono text-emerald-300">$2.49</div>
+                      <div className="text-[10px] text-neutral-400 font-mono">~2.49 USDT</div>
+                    </div>
                   </div>
-                  <div className="text-right shrink-0 ml-3">
-                    <div className="text-lg font-black font-mono text-amber-400">$0.99</div>
-                    <div className="text-[10px] text-neutral-400 font-mono">~0.99 USDT</div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-rose-400" />
+                      <span>Step 1: Choose License Format (Released Track)</span>
+                    </label>
+                    <span className="text-[11px] font-mono text-neutral-400">
+                      Selected: <span className="font-bold text-white">{selectedFormat.toUpperCase()} (${currentPrice.toFixed(2)})</span>
+                    </span>
                   </div>
-                </button>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* MP3 Option */}
+                    <button
+                      type="button"
+                      id="select-format-mp3"
+                      onClick={() => setSelectedFormat('mp3')}
+                      className={`flex items-start justify-between p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+                        selectedFormat === 'mp3'
+                          ? 'border-amber-400 bg-amber-500/15 ring-2 ring-amber-400/40 shadow-lg shadow-amber-500/10'
+                          : 'border-neutral-800 bg-[#0d0f17] hover:border-neutral-700 hover:bg-neutral-900'
+                      }`}
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-black text-white">MP3 License</span>
+                          <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-mono font-bold text-amber-400 border border-amber-500/30">
+                            320 kbps
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-neutral-400 leading-snug">
+                          High-quality MP3 for streaming, YouTube & mixtapes
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0 ml-3">
+                        <div className="text-lg font-black font-mono text-amber-400">$0.99</div>
+                        <div className="text-[10px] text-neutral-400 font-mono">~0.99 USDT</div>
+                      </div>
+                    </button>
 
-                {/* WAV Option */}
-                <button
-                  type="button"
-                  id="select-format-wav"
-                  onClick={() => setSelectedFormat('wav')}
-                  className={`flex items-start justify-between p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
-                    selectedFormat === 'wav'
-                      ? 'border-cyan-400 bg-cyan-500/15 ring-2 ring-cyan-400/40 shadow-lg shadow-cyan-500/10'
-                      : 'border-neutral-800 bg-[#0d0f17] hover:border-neutral-700 hover:bg-neutral-900'
-                  }`}
-                >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-black text-white">WAV Studio Master</span>
-                      <span className="rounded bg-cyan-500/20 px-1.5 py-0.5 text-[10px] font-mono font-bold text-cyan-400 border border-cyan-500/30">
-                        24-bit Lossless
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-neutral-400 leading-snug">
-                      Uncompressed studio master for radio & professional mastering
-                    </p>
+                    {/* WAV Option */}
+                    <button
+                      type="button"
+                      id="select-format-wav"
+                      onClick={() => setSelectedFormat('wav')}
+                      className={`flex items-start justify-between p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+                        selectedFormat === 'wav'
+                          ? 'border-cyan-400 bg-cyan-500/15 ring-2 ring-cyan-400/40 shadow-lg shadow-cyan-500/10'
+                          : 'border-neutral-800 bg-[#0d0f17] hover:border-neutral-700 hover:bg-neutral-900'
+                      }`}
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-black text-white">WAV Studio Master</span>
+                          <span className="rounded bg-cyan-500/20 px-1.5 py-0.5 text-[10px] font-mono font-bold text-cyan-400 border border-cyan-500/30">
+                            24-bit Lossless
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-neutral-400 leading-snug">
+                          Uncompressed studio master for radio & professional mastering
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0 ml-3">
+                        <div className="text-lg font-black font-mono text-cyan-400">$2.49</div>
+                        <div className="text-[10px] text-neutral-400 font-mono">~2.49 USDT</div>
+                      </div>
+                    </button>
                   </div>
-                  <div className="text-right shrink-0 ml-3">
-                    <div className="text-lg font-black font-mono text-cyan-400">$2.49</div>
-                    <div className="text-[10px] text-neutral-400 font-mono">~2.49 USDT</div>
-                  </div>
-                </button>
-              </div>
+                </>
+              )}
             </div>
 
             {/* Step 2: Payment Method */}

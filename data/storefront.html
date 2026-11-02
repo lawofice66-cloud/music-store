@@ -1127,8 +1127,8 @@ footer{
     <button class="filter-btn" id="f-anglais" data-filter="english" onclick="setCategoryFilter('english')">🇬🇧 English (<span id="count-anglais">0</span>)</button>
   </div>
   <div class="filter-group">
-    <button class="filter-btn" id="f-unreleased" data-filter="unreleased" onclick="setCategoryFilter('unreleased')">🟢 Unreleased (<span id="count-unreleased">0</span>)</button>
-    <button class="filter-btn" id="f-released" data-filter="released" onclick="setCategoryFilter('released')">🔴 Released (<span id="count-released">0</span>)</button>
+    <button class="filter-btn" id="f-unreleased" data-filter="unreleased" onclick="setCategoryFilter('unreleased')">🟢 Inédites ($2.49) (<span id="count-unreleased">0</span>)</button>
+    <button class="filter-btn" id="f-released" data-filter="released" onclick="setCategoryFilter('released')">🔴 Released ($0.99) (<span id="count-released">0</span>)</button>
   </div>
   <div class="filter-group">
     <button class="filter-btn" id="f-clips" data-filter="clips" onclick="setCategoryFilter('clips')">🎬 Video Clips (<span id="count-clips">0</span>)</button>
@@ -2228,8 +2228,8 @@ function renderVitrine(){
     }
 
     const badge = unreleased
-      ? `<span style="background:#22c55e22;color:#4ade80;border:1px solid #22c55e;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px">🟢 UNRELEASED</span>`
-      : `<span style="background:#ef444422;color:#f87171;border:1px solid #ef4444;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px">🔴 RELEASED</span>`;
+      ? `<span style="background:#22c55e22;color:#4ade80;border:1px solid #22c55e;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px">🟢 INÉDITE ($2.49)</span>`
+      : `<span style="background:#ef444422;color:#f87171;border:1px solid #ef4444;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px">🔴 RELEASED ($0.99)</span>`;
 
     const audioUrl = getAudioUrl(t);
     const trackLikes = t.likes || 0;
@@ -2248,10 +2248,10 @@ function renderVitrine(){
             ${catBadge}
           </div>
           <div style="font-size:11px;color:#cbd5e1;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-            ${t.description || 'HQ Studio Master • 320kbps MP3'}
+            ${t.description || (unreleased ? 'HQ Studio Master • Morceau Inédit Exclusive $2.49' : 'HQ Studio Master • 320kbps MP3')}
           </div>
           <div style="font-size:10px;color:#94a3b8;margin-top:3px">
-            🎧 Studio Preview • 24-Bit Master WAV on purchase
+            🎧 Studio Preview • ${unreleased ? '24-Bit Lossless WAV Inédite Master' : '24-Bit Master WAV on purchase'}
           </div>
         </div>
 
@@ -2277,23 +2277,38 @@ function renderVitrine(){
           </div>
 
           <div style="display:flex;justify-content:space-between;align-items:center;padding-top:4px;gap:6px;flex-wrap:wrap">
-            <div style="display:flex;flex-direction:column">
-              <div style="display:flex;align-items:baseline;gap:5px">
-                <span style="color:#60a5fa;font-weight:800;font-size:13.5px">MP3 $0.99</span>
-                <span style="color:#475569;font-size:11px">•</span>
-                <span style="color:var(--gold-light);font-weight:900;font-size:15px">WAV $2.49</span>
+            ${unreleased ? `
+              <div style="display:flex;flex-direction:column">
+                <div style="display:flex;align-items:baseline;gap:5px">
+                  <span style="color:#4ade80;font-weight:900;font-size:15px">Inédite Master: $2.49</span>
+                </div>
+                <div style="font-size:9.5px;color:#94a3b8">WAV 24-bit + MP3 Inclus</div>
               </div>
-              <div style="font-size:9.5px;color:#94a3b8">10-Track Pack: $15 ($1.50/ea)</div>
-            </div>
-            <div style="display:flex;gap:4px;align-items:center">
-              <button class="cart-add-btn" onclick="addToCartFormat(${globalIdx}, 'mp3')" title="Add MP3 to cart" style="padding:5px 7px;font-size:11px">🛒+MP3</button>
-              <button class="btn btn-sm" onclick="buySingleFormat(${globalIdx}, 'mp3')" title="Buy MP3 for $0.99 (Monetizable on YouTube, TikTok, Facebook &amp; Parties)" style="background:#2563eb;color:#fff;border-color:#3b82f6;padding:5px 8px;font-size:11px">⚡ MP3 $0.99</button>
-              <button class="btn btn-sm" onclick="buySingleFormat(${globalIdx}, 'wav')" title="Buy 24-Bit Studio Master WAV for $2.49 (Full Film/TV Sync &amp; Streaming)" style="padding:5px 8px;font-size:11px">👑 WAV $2.49</button>
-            </div>
+              <div style="display:flex;gap:4px;align-items:center">
+                <button class="cart-add-btn" onclick="addToCartFormat(${globalIdx}, 'wav')" title="Add Inédite Master to cart" style="padding:5px 7px;font-size:11px">🛒+Inédite</button>
+                <button class="btn btn-sm" onclick="buySingleFormat(${globalIdx}, 'wav')" title="Buy Inédite Studio Master for $2.49" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%);color:#000;font-weight:800;border-color:#34d399;padding:5px 10px;font-size:11px">👑 Inédite $2.49</button>
+              </div>
+            ` : `
+              <div style="display:flex;flex-direction:column">
+                <div style="display:flex;align-items:baseline;gap:5px">
+                  <span style="color:#60a5fa;font-weight:800;font-size:13.5px">MP3 $0.99</span>
+                  <span style="color:#475569;font-size:11px">•</span>
+                  <span style="color:var(--gold-light);font-weight:900;font-size:15px">WAV $2.49</span>
+                </div>
+                <div style="font-size:9.5px;color:#94a3b8">10-Track Pack: $15 ($1.50/ea)</div>
+              </div>
+              <div style="display:flex;gap:4px;align-items:center">
+                <button class="cart-add-btn" onclick="addToCartFormat(${globalIdx}, 'mp3')" title="Add MP3 to cart" style="padding:5px 7px;font-size:11px">🛒+MP3</button>
+                <button class="btn btn-sm" onclick="buySingleFormat(${globalIdx}, 'mp3')" title="Buy MP3 for $0.99" style="background:#2563eb;color:#fff;border-color:#3b82f6;padding:5px 8px;font-size:11px">⚡ MP3 $0.99</button>
+                <button class="btn btn-sm" onclick="buySingleFormat(${globalIdx}, 'wav')" title="Buy WAV Master for $2.49" style="padding:5px 8px;font-size:11px">👑 WAV $2.49</button>
+              </div>
+            `}
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;font-size:9px;color:#94a3b8;margin-top:4px">
-            <span style="color:#93c5fd">🟢 MP3: Social Monetization</span>
-            <span style="color:#fde047">👑 WAV: Full Sync &amp; Streaming</span>
+            ${unreleased 
+              ? `<span style="color:#86efac">🟢 Morceau Inédit: Exclusive Master Delivery</span><span style="color:#fde047">Licence Studio Complète</span>`
+              : `<span style="color:#93c5fd">🟢 MP3: Social Monetization</span><span style="color:#fde047">👑 WAV: Full Sync &amp; Streaming</span>`
+            }
           </div>
         </div>
       </div>
