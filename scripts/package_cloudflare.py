@@ -11,7 +11,7 @@ PUBLIC_DIR = os.path.join(ROOT_DIR, 'public')
 FUNCTIONS_DIR = os.path.join(ROOT_DIR, 'functions')
 
 def run_build():
-    print("Generating schema.sql with all 93 tracks...")
+    print("Generating schema.sql with all 140 tracks...")
     ret_schema = subprocess.run(["python3", "scripts/generate_schema_sql.py"], cwd=ROOT_DIR)
     if ret_schema.returncode != 0:
         print("Schema generation failed!")

@@ -4,7 +4,7 @@
 Ce projet est conçu pour une architecture Cloudflare 100% Serverless & Edge :
 - **Frontend** : React 18 + Vite + Tailwind CSS (ultra-rapide, distribué sur le CDN mondial Cloudflare).
 - **Backend API** : Cloudflare Pages Functions (`/functions/api/*`) ou Cloudflare Worker (`worker.ts`).
-- **Base de données SQL** : Cloudflare D1 (`fallen75-db`) stockant les 93 morceaux, les commandes et les wallets.
+- **Base de données SQL** : Cloudflare D1 (`fallen75-db`) stockant les 140 morceaux, les commandes et les wallets.
 - **Stockage Médias & Masters** : Cloudflare R2 (`music-2026`) pour les fichiers MP3, WAV, stems et pochettes.
 
 ---
@@ -43,11 +43,11 @@ Dans le tableau de bord web de Cloudflare (**dash.cloudflare.com**) :
      - **D1 database bindings** : Variable name = `DB`, Database = `fallen75-db`
      - **R2 bucket bindings** : Variable name = `R2_BUCKET`, Bucket = `music-2026`
      - **Environment variables** : `ADMIN_PASSWORD` = `12344321` (ou votre mot de passe admin).
-8. **Initialiser la base D1 avec les 93 morceaux** :
+8. **Initialiser la base D1 avec les 140 morceaux** :
    ```bash
    npx wrangler d1 execute fallen75-db --file=./schema.sql
    ```
-   *Tous les 93 morceaux, les prix, et les wallets sont alors instantanément injectés dans votre base D1 !*
+   *Tous les 140 morceaux, les prix, et les wallets sont alors instantanément injectés dans votre base D1 !*
 
 ---
 
@@ -64,7 +64,7 @@ Si vous ne souhaitez pas utiliser Git :
    npx wrangler d1 create fallen75-db
    npx wrangler r2 bucket create music-2026
    ```
-3. Initialisez la base D1 avec les 93 morceaux du catalogue :
+3. Initialisez la base D1 avec les 140 morceaux du catalogue :
    ```bash
    npx wrangler d1 execute fallen75-db --file=./schema.sql
    ```

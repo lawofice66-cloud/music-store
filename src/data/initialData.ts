@@ -35,12 +35,6 @@ export const INITIAL_PAYMENT_CONFIG: PaymentConfig = {
       instructions: 'Send a direct Skrill transfer to azzoulaali@hotmail.com with the beat title as transaction reference.',
       active: true,
     },
-    payoneer: {
-      label: 'Payoneer',
-      account: 'azzoulaali@hotmail.com',
-      instructions: 'Use the fee-free "Pay another Payoneer user" feature to azzoulaali@hotmail.com and include the beat title.',
-      active: true,
-    },
     redotpay: {
       label: 'RedotPay (Visa Card)',
       account: 'lawofice66@gmail.com',

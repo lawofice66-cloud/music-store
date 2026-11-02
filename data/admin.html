@@ -1,0 +1,1182 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FALLEN 75 – Administration Sécurisée (AA2026)</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#090a0f;color:#fff;font-family:'Plus Jakarta Sans',sans-serif}
+h1,h2,h3{font-family:'Cinzel',serif}
+.header{padding:30px 24px 20px;text-align:center;background:linear-gradient(180deg,#151824 0%,#090a0f 100%);border-bottom:2px solid #f59e0b}
+.badge{background:#1f2937;padding:6px 14px;border-radius:999px;font-size:12px;display:inline-block}
+.btn{background:#f59e0b;color:#000;padding:9px 18px;border-radius:999px;font-weight:800;display:inline-flex;gap:6px;cursor:pointer;border:none;font-family:inherit;transition:.2s;align-items:center}
+.btn:hover{filter:brightness(1.1)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-dark{background:#222;color:#fff}
+.btn-red{background:#ef4444;color:#fff}
+.btn-green{background:#22c55e;color:#000}
+input,textarea,select{background:#0a0c12;border:1px solid #333;color:#fff;padding:10px 12px;border-radius:10px;width:100%;font-family:inherit;box-sizing:border-box}
+.admin-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+.tab-btn{background:#1a1e2d;color:#aaa;padding:9px 18px;border-radius:999px;border:1px solid #2a2f45;cursor:pointer;font-weight:700;font-size:13px;transition:.2s}
+.tab-btn:hover{color:#fff;border-color:#f59e0b}
+.tab-btn.active{background:#f59e0b;color:#000;border-color:#f59e0b}
+.admin-section{display:none}
+.admin-section.active{display:block}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin:12px 0}
+.stat-card{background:#11131c;border:1px solid #222;border-radius:12px;padding:14px}
+.stat-val{font-size:22px;font-weight:900;color:#f59e0b}
+.stat-label{font-size:11px;opacity:.6}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:999;padding:16px}
+.modal.open{display:flex}
+.modal-box{background:#151821;border:1px solid #2a2f45;border-radius:20px;max-width:650px;width:100%;padding:24px;max-height:92vh;overflow-y:auto}
+.copy-btn{background:#222;color:#fff;border:none;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;margin-left:6px}
+.row{border-bottom:1px solid #222;padding:12px 0;display:grid;grid-template-columns:1.6fr .6fr 1.2fr .8fr auto;gap:10px;align-items:center;min-width:700px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex;justify-content:space-between;align-items:center;max-width:1400px;margin:0 auto;flex-wrap:wrap;gap:12px">
+    <div>
+      <h1 style="margin:0;font-size:28px;color:#f59e0b">🎛️ FALLEN 75 – CONSOLE ADMIN SECRÈTE</h1>
+      <div style="font-size:12px;color:#94a3b8;margin-top:4px">Route protégée : /admin-ali-2026-75 • Session Master</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <a href="/" class="btn btn-sm btn-dark" style="text-decoration:none">🌐 Voir la Vitrine Publique</a>
+      <button class="btn btn-sm btn-red" onclick="adminLogout()">🔒 Quitter Admin</button>
+    </div>
+  </div>
+</div>
+
+<div style="max-width:1400px;margin:20px auto;padding:0 20px">
+  <div style="background:#151821;border:1px solid #283049;border-radius:16px;padding:18px;margin-bottom:20px">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <input id="adminPass" type="password" value="FALLEN2026AA" style="max-width:220px;font-family:monospace">
+        <button class="btn btn-sm btn-green" onclick="checkPass()">Déverrouiller</button>
+        <button class="btn btn-sm btn-dark" onclick="rescanR2()">🔄 Re-scan R2 mp3/</button>
+        <span id="adminMsg" style="font-size:12px;font-weight:700;color:#22c55e">✅ Connecté (FALLEN2026AA)</span>
+      </div>
+      <div>
+        <span id="adminCount" class="badge">0 tracks</span>
+        <span id="orderCount" class="badge" style="background:#f59e0b;color:#000">0 orders</span>
+        <span id="clipCount" class="badge" style="background:#222">0 clips</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-tabs">
+    <button class="tab-btn active" onclick="showTab('ventes', this)">📊 Ventes</button>
+    <button class="tab-btn" onclick="showTab('visitors', this);loadTelemetry()">👀 Visiteurs & Recherches</button>
+    <button class="tab-btn" onclick="showTab('tracks', this)">🎵 Gestion & Ajout de Tracks</button>
+    <button class="tab-btn" onclick="showTab('clips', this)">🎬 Clips Vidéos Officiels</button>
+    <button class="tab-btn" onclick="showTab('stock', this)">💿 Zone Transit (WAV)</button>
+    <button class="tab-btn" onclick="showTab('orders', this)">📦 Commandes Clients</button>
+  </div>
+
+  <!-- TAB 1: VENTES -->
+  <div id="tab-ventes" class="admin-section active">
+    <h3>📊 Suivi des Ventes & Chiffre d'Affaires</h3>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-val" id="statTotal">0</div><div class="stat-label">Total Commandes</div></div>
+      <div class="stat-card"><div class="stat-val" id="statPending">0</div><div class="stat-label">En Attente</div></div>
+      <div class="stat-card"><div class="stat-val" id="statApproved">0</div><div class="stat-label">Approuvées</div></div>
+      <div class="stat-card"><div class="stat-val" id="statCA">0 $</div><div class="stat-label">CA Total</div></div>
+      <div class="stat-card"><div class="stat-val" id="statToday">0 $</div><div class="stat-label">Aujourd'hui</div></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-sm btn-dark" onclick="loadOrders()">🔄 Refresh</button>
+      <button class="btn btn-sm btn-green" onclick="exportCSV()">📥 Export CSV Excel</button>
+    </div>
+    <div id="salesList" style="margin-top:14px;font-size:12px;opacity:.85"></div>
+  </div>
+
+  <!-- TAB 2: VISITEURS & RECHERCHES -->
+  <div id="tab-visitors" class="admin-section">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <div>
+        <h3 style="margin:0;color:#f59e0b">👀 Suivi Visiteurs & Recherches en Direct</h3>
+        <p style="margin:4px 0 0;font-size:12px;opacity:.8">Activité en direct sur votre vitrine FALLEN 75 FRANCE</p>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-sm btn-dark" onclick="loadTelemetry()">🔄 Actualiser</button>
+        <button class="btn btn-sm btn-red" onclick="clearTelemetry()">🗑️ Vider l'Historique</button>
+      </div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-val" id="statVisitsTotal">0</div><div class="stat-label">👀 Visites Totales</div></div>
+      <div class="stat-card"><div class="stat-val" id="statVisitsToday">0</div><div class="stat-label">📅 Visites Aujourd'hui</div></div>
+      <div class="stat-card"><div class="stat-val" id="statSearchesTotal">0</div><div class="stat-label">🔍 Recherches Effectuées</div></div>
+      <div class="stat-card"><div class="stat-val" id="statListensTotal">0</div><div class="stat-label">🎧 Écoutes Réalisées</div></div>
+      <div class="stat-card"><div class="stat-val" id="statLikesTotal">0</div><div class="stat-label">❤️ Coups de Cœur (Likes)</div></div>
+    </div>
+    <div style="background:#11131c;border:1px solid #232a3d;border-radius:12px;padding:14px;margin-bottom:14px">
+      <h4 style="margin:0 0 10px;color:#f59e0b;font-size:14px">🔥 Morceaux les plus Populaires (Écoutes & Likes)</h4>
+      <div id="topTracksList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;font-size:12px">
+        <span style="opacity:.6">Chargement...</span>
+      </div>
+    </div>
+    <div style="background:#11131c;border:1px solid #232a3d;border-radius:12px;padding:14px;margin-bottom:14px">
+      <h4 style="margin:0 0 10px;color:#f59e0b;font-size:14px">🔍 Que recherchent vos visiteurs ?</h4>
+      <div id="topSearchesList" style="display:flex;flex-wrap:wrap;gap:8px;font-size:12px">
+        <span style="opacity:.6">Aucune recherche enregistrée.</span>
+      </div>
+    </div>
+    <div style="background:#11131c;border:1px solid #232a3d;border-radius:12px;padding:14px">
+      <h4 style="margin:0 0 10px;color:#f59e0b;font-size:14px">⚡ Flux d'Activité Récente</h4>
+      <div id="activityFeedList" style="max-height:420px;overflow-y:auto;font-size:12px">
+        <span style="opacity:.6">Chargement...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: GESTION TRACKS -->
+  <div id="tab-tracks" class="admin-section">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <h3 style="margin:0">🎵 Gestion & Ajout de Tracks MP3</h3>
+      <button class="btn btn-sm btn-green" onclick="newTrackMode()">➕ Nouveau Morceau MP3</button>
+    </div>
+    <div style="background:#11131c;border:1px solid #222;border-radius:12px;padding:14px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <b id="trackFormTitle" style="color:#f59e0b">➕ Ajouter ou Éditer un Morceau MP3</b>
+        <span id="trackModeBadge" style="font-size:11px;opacity:.7">Mode Création</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 90px 130px 130px 1fr 1fr auto;gap:8px;align-items:center">
+        <input id="f_title" placeholder="Titre du morceau (ex: After the storm)">
+        <input id="f_price" type="number" step="0.01" placeholder="Prix (ex: 2.49)">
+        <select id="f_category" style="background:#0d0f17;color:#f59e0b;font-weight:700">
+          <option value="francais">🇫🇷 Français</option>
+          <option value="anglais">🇬🇧 Anglais</option>
+          <option value="instrumentale">🎹 Instrumentale</option>
+          <option value="accapella">🎙️ Accapella</option>
+        </select>
+        <select id="f_status" style="background:#0d0f17;color:#22c55e;font-weight:700">
+          <option value="released">🔴 Released</option>
+          <option value="unreleased">🟢 Unreleased</option>
+          <option value="hidden">👁️ Masqué</option>
+        </select>
+        <input id="f_url" placeholder="URL MP3 (R2 mp3/... ou externe)">
+        <input id="f_cover" placeholder="Cover Photo Unsplash URL">
+        <button class="btn btn-sm btn-green" onclick="saveTrack()">💾 Enregistrer</button>
+        <input id="f_id" type="hidden">
+        <textarea id="f_desc" placeholder="Description / Détails techniques / Paroles..." style="grid-column:1 / span 6" rows="2"></textarea>
+        <input id="f_slug" placeholder="slug auto (ex: after-the-storm)" style="grid-column:1 / span 5">
+        <button class="btn btn-sm btn-dark" onclick="clearForm()">Annuler / Vider</button>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:12px;align-items:center;flex-wrap:wrap">
+        <div style="display:flex;gap:6px;align-items:center">
+          <input type="file" id="trackMp3File" accept="audio/mp3,audio/wav,audio/*" style="max-width:220px;font-size:11px">
+          <button class="btn btn-sm btn-dark" type="button" onclick="uploadTrackMp3File()">⬆️ Upload MP3 vers R2</button>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <input type="file" id="trackCoverFile" accept="image/*" style="max-width:200px;font-size:11px">
+          <button class="btn btn-sm btn-dark" type="button" onclick="uploadTrackCoverFile()">🖼️ Upload Cover</button>
+        </div>
+        <button class="btn btn-sm btn-dark" type="button" onclick="fillRandomTrackCover()">✨ Photo Aléatoire</button>
+      </div>
+    </div>
+    <input id="search" placeholder="🔍 Rechercher parmi vos tracks..." style="margin:10px 0" oninput="filterList()">
+    <div style="overflow-x:auto"><div id="adminList"></div></div>
+  </div>
+
+  <!-- TAB 4: CLIPS -->
+  <div id="tab-clips" class="admin-section">
+    <h3>🎬 Clips Vidéos Officiels</h3>
+    <p style="opacity:.6;font-size:12px;margin-bottom:8px">Ajoutez des clips MP4 stockés sur R2.</p>
+    <div style="display:grid;grid-template-columns:1fr 90px 1fr 1fr auto;gap:8px;align-items:center">
+      <input id="c_title" placeholder="Titre du clip">
+      <input id="c_price" type="number" step="0.01" placeholder="9.99">
+      <input id="c_url" placeholder="Video URL R2 clips/...mp4">
+      <input id="c_thumb" placeholder="Thumbnail Unsplash URL">
+      <button class="btn btn-sm" onclick="saveClip()">💾 Save Clip</button>
+      <textarea id="c_desc" placeholder="Description du clip..." style="grid-column:1 / span 4" rows="2"></textarea>
+      <input id="c_slug" placeholder="slug auto" style="grid-column:1 / span 3">
+      <button class="btn btn-sm btn-dark" onclick="clearClipForm()">Cancel</button>
+      <input id="c_id" type="hidden">
+    </div>
+    <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap">
+      <input type="file" id="clipFile" accept="video/mp4,video/webm,video/*" style="max-width:240px">
+      <button class="btn btn-sm btn-dark" onclick="uploadClipFile()">⬆️ Upload mp4 vers clips/</button>
+      <input type="file" id="thumbFile" accept="image/*" style="max-width:240px">
+      <button class="btn btn-sm btn-dark" onclick="uploadThumbFile()">🖼️ Upload cover</button>
+    </div>
+    <div style="overflow-x:auto"><div id="clipsList"></div></div>
+  </div>
+
+  <!-- TAB 5: ZONE TRANSIT & STOCK WAV -->
+  <div id="tab-stock" class="admin-section">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+      <h3 style="margin:0">💿 Stock WAV &amp; Individual Order Delivery Preparation</h3>
+      <button class="btn btn-sm btn-dark" onclick="refreshDeliveryOrders()">🔄 Refresh Orders</button>
+    </div>
+
+    <!-- ORDER DELIVERY PREPARATION WORKSPACE -->
+    <div style="background:#151824;border:1px solid #2a3449;border-radius:14px;padding:16px;margin-bottom:20px">
+      <div style="font-size:12px;color:#94a3b8;margin-bottom:10px">
+        Select a customer order to associate its <b>Master WAV</b>, <b>320kbps MP3</b>, and <b>Commercial License PDF</b>, then generate the secure 24-hour individual download link.
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+        <label style="font-weight:700;font-size:13px;color:var(--gold-light);white-space:nowrap">Select Order:</label>
+        <select id="deliveryOrderSelect" onchange="onSelectDeliveryOrder()" style="flex:1;min-width:280px;background:#0b0c12;color:#fff;padding:9px 12px;border:1px solid #334155;border-radius:8px;font-size:13px">
+          <option value="">-- Select an order to prepare files --</option>
+        </select>
+      </div>
+
+      <!-- SELECTED ORDER BANNER -->
+      <div id="selectedOrderBanner" style="display:none;background:#0d0f17;border:1px solid #334155;border-radius:10px;padding:14px;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+          <div>
+            <span style="font-size:11px;color:#94a3b8">ORDER ID:</span>
+            <b id="bannerOrderId" style="color:var(--gold-light);margin-left:4px;font-family:monospace"></b>
+            <span id="bannerOrderStatusBadge" class="badge" style="margin-left:8px"></span>
+          </div>
+          <div id="bannerOrderDate" style="font-size:11px;color:#94a3b8"></div>
+        </div>
+        <div style="margin-top:8px;font-size:13px;color:#e2e8f0;display:flex;flex-wrap:wrap;gap:14px">
+          <div>Customer: <b id="bannerCustomerEmail" style="color:#fff"></b></div>
+          <div>Purchased Track(s): <b id="bannerTrackName" style="color:var(--gold-light)"></b></div>
+          <div>Amount: <b id="bannerOrderPrice" style="color:#22c55e"></b></div>
+        </div>
+        <div id="bannerTxidRow" style="font-size:11px;font-family:monospace;color:#fbbf24;margin-top:6px;word-break:break-all"></div>
+      </div>
+
+      <!-- 3 FILE SLOTS: WAV, MP3, LICENSE PDF -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:14px">
+        <!-- 1. WAV MASTER -->
+        <div style="background:#0e111a;border:1px solid #232a3d;border-radius:10px;padding:14px;display:flex;flex-direction:column;justify-content:space-between">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <b style="color:#fff;font-size:14px">🎵 1. WAV Master (24-Bit)</b>
+              <span id="statusBadgeWav" class="badge" style="background:#ef444422;color:#f87171;border:1px solid #ef4444">❌ Missing</span>
+            </div>
+            <div id="fileInfoWav" style="font-size:11px;color:#94a3b8;min-height:28px">No WAV uploaded yet.</div>
+          </div>
+          <div style="margin-top:12px">
+            <input type="file" id="orderWavFile" accept=".wav,audio/wav,audio/*" style="width:100%;font-size:11px;margin-bottom:6px">
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-sm" onclick="uploadOrderFileSlot('wav')" style="background:linear-gradient(135deg,#d4af37,#c49b2c);color:#000;font-weight:700;flex:1">⬆️ Upload WAV</button>
+              <button id="btnDeleteWav" class="btn btn-sm btn-dark" onclick="deleteOrderFileSlot('wav')" style="display:none" title="Remove WAV">🗑️</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. MP3 AUDIO -->
+        <div style="background:#0e111a;border:1px solid #232a3d;border-radius:10px;padding:14px;display:flex;flex-direction:column;justify-content:space-between">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <b style="color:#fff;font-size:14px">🎧 2. MP3 Audio (320kbps)</b>
+              <span id="statusBadgeMp3" class="badge" style="background:#ef444422;color:#f87171;border:1px solid #ef4444">❌ Missing</span>
+            </div>
+            <div id="fileInfoMp3" style="font-size:11px;color:#94a3b8;min-height:28px">No MP3 uploaded yet.</div>
+          </div>
+          <div style="margin-top:12px">
+            <input type="file" id="orderMp3File" accept=".mp3,audio/mpeg,audio/*" style="width:100%;font-size:11px;margin-bottom:6px">
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-sm" onclick="uploadOrderFileSlot('mp3')" style="background:linear-gradient(135deg,#d4af37,#c49b2c);color:#000;font-weight:700;flex:1">⬆️ Upload MP3</button>
+              <button id="btnDeleteMp3" class="btn btn-sm btn-dark" onclick="deleteOrderFileSlot('mp3')" style="display:none" title="Remove MP3">🗑️</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. COMMERCIAL LICENSE PDF -->
+        <div style="background:#0e111a;border:1px solid #232a3d;border-radius:10px;padding:14px;display:flex;flex-direction:column;justify-content:space-between">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <b style="color:#fff;font-size:14px">📄 3. License PDF</b>
+              <span id="statusBadgeLicense" class="badge" style="background:#ef444422;color:#f87171;border:1px solid #ef4444">❌ Missing</span>
+            </div>
+            <div id="fileInfoLicense" style="font-size:11px;color:#94a3b8;min-height:28px">No PDF uploaded yet.</div>
+          </div>
+          <div style="margin-top:12px">
+            <input type="file" id="orderLicenseFile" accept=".pdf,application/pdf" style="width:100%;font-size:11px;margin-bottom:6px">
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-sm" onclick="uploadOrderFileSlot('license')" style="background:linear-gradient(135deg,#d4af37,#c49b2c);color:#000;font-weight:700;flex:1">⬆️ Upload PDF</button>
+              <button class="btn btn-sm btn-dark" onclick="generateOfficialOrderLicense()" title="Generate Official FALLEN 75 PDF License">✨ Auto PDF</button>
+              <button id="btnDeleteLicense" class="btn btn-sm btn-dark" onclick="deleteOrderFileSlot('license')" style="display:none" title="Remove License">🗑️</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DELIVERY SUMMARY & ACTIVATE BUTTON -->
+      <div style="background:#0d0f17;border:1px solid #f59e0b44;border-radius:12px;padding:16px;margin-top:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+          <div>
+            <div style="font-weight:800;font-size:14px;color:#fff;margin-bottom:4px">Delivery Status:</div>
+            <div id="deliverySummaryText" style="font-size:13px;color:#cbd5e1">
+              Track: <b id="summaryTrackName" style="color:var(--gold-light)">—</b> &nbsp;|&nbsp;
+              WAV: <span id="summaryWavStatus">❌</span> &nbsp;|&nbsp;
+              MP3: <span id="summaryMp3Status">❌</span> &nbsp;|&nbsp;
+              License PDF: <span id="summaryLicStatus">❌</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <button id="btnActivateDelivery" class="btn" onclick="activateOrderDelivery()" style="background:#22c55e;color:#000;font-weight:900;padding:12px 22px;border:none;font-size:14px;border-radius:8px">
+              ⚡ Create / Activate 24h Download
+            </button>
+          </div>
+        </div>
+
+        <!-- ACTIVE LINK DISPLAY -->
+        <div id="deliveryActiveLinkBox" style="display:none;margin-top:14px;padding:14px;background:#06080d;border:1px solid #22c55e;border-radius:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+            <span style="color:#22c55e;font-weight:800;font-size:13px">✅ 24h Master Pack Activated (Single Order Archive)</span>
+            <span id="deliveryExpiresLabel" style="font-size:11px;color:#94a3b8"></span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <input id="inputDownloadUrl" readonly style="flex:1;min-width:260px;background:#111420;color:#fbbf24;font-family:monospace;font-size:12px;padding:10px;border-radius:8px;border:1px solid #334155">
+            <a id="btnDirectDownloadLink" href="#" target="_blank" class="btn btn-sm" style="background:linear-gradient(135deg,#d4af37,#c49b2c);color:#000;font-weight:800;text-decoration:none;padding:10px 16px">⬇️ Direct Download</a>
+            <button class="btn btn-sm btn-dark" onclick="copyDeliveryUrl()" style="padding:10px 14px">📋 Copy Link</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 6: ORDERS -->
+  <div id="tab-orders" class="admin-section">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <h3>📦 Commandes Clients - Génération de lien 24h</h3>
+      <button class="btn btn-sm btn-dark" onclick="loadOrders()">🔄 Refresh Orders</button>
+    </div>
+    <div id="ordersList" style="margin-top:10px">Cliquez sur Refresh Orders.</div>
+  </div>
+</div>
+
+<!-- Modal Track Edit -->
+<div id="trackEditModal" class="modal" onclick="if(event.target==this)closeTrackModal()">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h2 id="modal_t_header" style="margin:0;color:#f59e0b">🎵 Édition du Morceau MP3</h2>
+      <button class="btn btn-sm btn-dark" onclick="closeTrackModal()">✕</button>
+    </div>
+    <input id="modal_t_id" type="hidden">
+    <label style="font-size:12px;opacity:.8;display:block;margin-top:6px">Titre :</label>
+    <input id="modal_t_title">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-top:8px">
+      <div>
+        <label style="font-size:12px;opacity:.8;display:block">Prix ($) :</label>
+        <input id="modal_t_price" type="number" step="0.01">
+      </div>
+      <div>
+        <label style="font-size:12px;opacity:.8;display:block">Case / Genre :</label>
+        <select id="modal_t_category" style="background:#0d0f17;color:#f59e0b;font-weight:700">
+          <option value="francais">🇫🇷 Français</option>
+          <option value="anglais">🇬🇧 Anglais</option>
+          <option value="instrumentale">🎹 Instrumentale</option>
+          <option value="accapella">🎙️ Accapella</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px;opacity:.8;display:block">Statut :</label>
+        <select id="modal_t_status" style="background:#0d0f17;color:#22c55e;font-weight:700">
+          <option value="released">🔴 Released</option>
+          <option value="unreleased">🟢 Unreleased</option>
+          <option value="hidden">👁️ Masqué</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px;opacity:.8;display:block">Slug (auto) :</label>
+        <input id="modal_t_slug">
+      </div>
+    </div>
+    <label style="font-size:12px;opacity:.8;display:block;margin-top:10px">URL Audio (MP3) :</label>
+    <input id="modal_t_url">
+    <label style="font-size:12px;opacity:.8;display:block;margin-top:10px">Cover Image :</label>
+    <input id="modal_t_cover">
+    <label style="font-size:12px;opacity:.8;display:block;margin-top:10px">Description :</label>
+    <textarea id="modal_t_desc" rows="2"></textarea>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-green" style="flex:1" onclick="saveTrackModal()">💾 Sauvegarder</button>
+      <button class="btn btn-red" onclick="deleteTrackModal()">🗑️ Supprimer</button>
+      <button class="btn btn-dark" onclick="closeTrackModal()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let allTracks = [];
+let allClips = [];
+const DEFAULT_PASS = 'FALLEN2026AA';
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function getAdminPass() {
+  const p = document.getElementById('adminPass');
+  if (p && p.value && p.value.trim()) return p.value.trim();
+  const stored = localStorage.getItem('fallen_admin_pass');
+  if (stored) return stored;
+  return DEFAULT_PASS;
+}
+
+function checkPass() {
+  const p = (getAdminPass() || '').trim();
+  const valid = ['fallen2026aa', '12344321', 'fallen75', 'admin2026'].includes(p.toLowerCase()) || p === DEFAULT_PASS;
+  if(valid) {
+    document.getElementById('adminMsg').textContent = '✅ Connecté (FALLEN2026AA)';
+    document.getElementById('adminMsg').style.color = '#22c55e';
+    localStorage.setItem('fallen_admin', 'true');
+    localStorage.setItem('fallen_admin_pass', p);
+    loadAll();
+  } else {
+    document.getElementById('adminMsg').textContent = '❌ Mot de passe incorrect';
+    document.getElementById('adminMsg').style.color = '#ef4444';
+  }
+}
+
+function adminLogout() {
+  localStorage.removeItem('fallen_admin');
+  localStorage.removeItem('fallen_admin_pass');
+  fetch('/api/admin/logout', { method: 'POST' }).catch(()=>{});
+  document.cookie = "admin_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+  window.location.href = "/";
+}
+
+function showTab(tabName, btn) {
+  document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const t = document.getElementById('tab-' + tabName);
+  if(t) t.classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(tabName === 'stock' || tabName === 'orders' || tabName === 'ventes') {
+    loadOrders();
+  }
+}
+
+async function loadAll() {
+  await Promise.all([loadTracks(), loadClips(), loadOrders(), loadTelemetry()]);
+}
+
+async function loadTracks() {
+  try {
+    const res = await fetch('/api/tracks');
+    allTracks = await res.json();
+    document.getElementById('adminCount').textContent = allTracks.length + ' tracks';
+    renderAdminTracks(allTracks);
+  } catch(e) { console.error(e); }
+}
+
+async function loadClips() {
+  try {
+    const res = await fetch('/api/clips');
+    allClips = await res.json();
+    document.getElementById('clipCount').textContent = allClips.length + ' clips';
+    renderAdminClips(allClips);
+  } catch(e) { console.error(e); }
+}
+
+function renderAdminTracks(tracks) {
+  const el = document.getElementById('adminList');
+  if(!el) return;
+  el.innerHTML = tracks.map((t, i) => {
+    const isUnreleased = (t.status === 'unreleased') || (t.price >= 2 && t.status !== 'released');
+    const isHidden = (t.status === 'hidden');
+    let statusBadge = `<span class="badge" style="background:rgba(239,68,68,0.2);color:#f87171;font-size:10px">🔴 Released</span>`;
+    if(isHidden) {
+      statusBadge = `<span class="badge" style="background:rgba(148,163,184,0.2);color:#94a3b8;font-size:10px">👁️ Masqué</span>`;
+    } else if(isUnreleased) {
+      statusBadge = `<span class="badge" style="background:rgba(34,197,94,0.2);color:#4ade80;font-size:10px">🟢 Unreleased</span>`;
+    }
+
+    return `
+    <div class="row">
+      <div>
+        <b>${t.title}</b> ${statusBadge}<br>
+        <small style="color:#94a3b8">${t.slug} • ${t.category || 'non classé'}</small>
+      </div>
+      <div style="color:#f59e0b;font-weight:700">${(t.price || 0.99).toFixed(2)} $</div>
+      <div style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.audioPreviewUrl || 'Aucun audio'}</div>
+      <div style="font-size:11px">❤️ ${t.likes || 0} | 🎧 ${t.views || 0}</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-sm btn-dark" onclick="openTrackEditor(${i})">✏️ Éditer</button>
+        <button class="btn btn-sm btn-red" onclick="deleteTrack('${t.id || t.slug}')">🗑️</button>
+      </div>
+    </div>
+  `;}).join('') || '<div style="padding:12px;opacity:.6">Aucun morceau.</div>';
+}
+
+function renderAdminClips(clips) {
+  const el = document.getElementById('clipsList');
+  if(!el) return;
+  el.innerHTML = clips.map((c, i) => `
+    <div class="row">
+      <div><b>${c.title}</b><br><small style="color:#94a3b8">${c.slug}</small></div>
+      <div style="color:#f59e0b;font-weight:700">${(c.price || 9.99).toFixed(2)} $</div>
+      <div style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.videoUrl || ''}</div>
+      <div>-</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-sm btn-red" onclick="deleteClip('${c.id || c.slug}')">🗑️</button>
+      </div>
+    </div>
+  `).join('') || '<div style="padding:12px;opacity:.6">Aucun clip.</div>';
+}
+
+function openTrackEditor(idx) {
+  const t = allTracks[idx];
+  if(!t) return;
+  document.getElementById('modal_t_id').value = t.id || t.slug;
+  document.getElementById('modal_t_title').value = t.title || '';
+  document.getElementById('modal_t_price').value = t.price || 0.99;
+  document.getElementById('modal_t_category').value = t.category || 'francais';
+  document.getElementById('modal_t_status').value = t.status || (t.price >= 2 ? 'unreleased' : 'released');
+  document.getElementById('modal_t_slug').value = t.slug || '';
+  document.getElementById('modal_t_url').value = t.audioPreviewUrl || '';
+  document.getElementById('modal_t_cover').value = t.coverImage || t.cover || '';
+  document.getElementById('modal_t_desc').value = t.description || '';
+  document.getElementById('trackEditModal').classList.add('open');
+}
+
+function closeTrackModal() {
+  document.getElementById('trackEditModal').classList.remove('open');
+}
+
+async function saveTrackModal() {
+  const pass = getAdminPass();
+  const id = document.getElementById('modal_t_id').value;
+  const payload = {
+    title: document.getElementById('modal_t_title').value.trim(),
+    slug: document.getElementById('modal_t_slug').value.trim(),
+    price: parseFloat(document.getElementById('modal_t_price').value) || 0.99,
+    category: document.getElementById('modal_t_category').value,
+    status: document.getElementById('modal_t_status').value,
+    audioPreviewUrl: document.getElementById('modal_t_url').value.trim(),
+    coverImage: document.getElementById('modal_t_cover').value.trim(),
+    description: document.getElementById('modal_t_desc').value.trim()
+  };
+  const res = await fetch('/api/tracks/' + encodeURIComponent(id), {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'x-admin-pass': pass },
+    body: JSON.stringify(payload)
+  });
+  if(res.ok) {
+    alert('✅ Morceau mis à jour !');
+    closeTrackModal();
+    loadTracks();
+  } else {
+    alert('Erreur enregistrement');
+  }
+}
+
+async function deleteTrack(id) {
+  if(!confirm('Supprimer ce morceau ?')) return;
+  const pass = getAdminPass();
+  const res = await fetch('/api/tracks/' + encodeURIComponent(id), {
+    method: 'DELETE',
+    headers: { 'x-admin-pass': pass }
+  });
+  if(res.ok) {
+    alert('Morceau supprimé.');
+    loadTracks();
+  }
+}
+
+async function deleteTrackModal() {
+  const id = document.getElementById('modal_t_id').value;
+  if(id) {
+    await deleteTrack(id);
+    closeTrackModal();
+  }
+}
+
+function newTrackMode() {
+  clearForm();
+  document.getElementById('f_title').focus();
+}
+
+function clearForm() {
+  document.getElementById('f_id').value = '';
+  document.getElementById('f_title').value = '';
+  document.getElementById('f_price').value = '2.49';
+  document.getElementById('f_category').value = 'francais';
+  const fStat = document.getElementById('f_status');
+  if(fStat) fStat.value = 'released';
+  document.getElementById('f_url').value = '';
+  document.getElementById('f_cover').value = '';
+  document.getElementById('f_desc').value = '';
+  document.getElementById('f_slug').value = '';
+}
+
+async function saveTrack() {
+  const pass = getAdminPass();
+  const title = document.getElementById('f_title').value.trim();
+  if(!title) { alert('Titre requis'); return; }
+  const fStat = document.getElementById('f_status');
+  const payload = {
+    title,
+    slug: document.getElementById('f_slug').value.trim() || title.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+    price: parseFloat(document.getElementById('f_price').value) || 2.49,
+    category: document.getElementById('f_category').value,
+    status: fStat ? fStat.value : 'released',
+    audioPreviewUrl: document.getElementById('f_url').value.trim(),
+    coverImage: document.getElementById('f_cover').value.trim(),
+    description: document.getElementById('f_desc').value.trim()
+  };
+  const res = await fetch('/api/tracks', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-admin-pass': pass },
+    body: JSON.stringify(payload)
+  });
+  if(res.ok) {
+    alert('✅ Morceau créé !');
+    clearForm();
+    loadTracks();
+  } else {
+    alert('Erreur création morceau');
+  }
+}
+
+async function uploadTrackMp3File() {
+  const file = document.getElementById('trackMp3File').files[0];
+  if(!file) { alert('Choisir un fichier audio'); return; }
+  const pass = getAdminPass();
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('prefix', 'mp3/');
+  const r = await fetch('/api/upload', { method: 'POST', headers: { 'x-admin-pass': pass }, body: fd });
+  const d = await r.json();
+  if(d.publicUrl) {
+    document.getElementById('f_url').value = d.publicUrl;
+    alert('✅ MP3 téléversé : ' + d.publicUrl);
+  }
+}
+
+async function uploadTrackCoverFile() {
+  const file = document.getElementById('trackCoverFile').files[0];
+  if(!file) { alert('Choisir une image'); return; }
+  const pass = getAdminPass();
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('prefix', 'covers/');
+  const r = await fetch('/api/upload', { method: 'POST', headers: { 'x-admin-pass': pass }, body: fd });
+  const d = await r.json();
+  if(d.publicUrl) {
+    document.getElementById('f_cover').value = d.publicUrl;
+    alert('✅ Cover téléversée');
+  }
+}
+
+function fillRandomTrackCover() {
+  const covers = [
+    'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600',
+    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600',
+    'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600',
+    'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=600'
+  ];
+  document.getElementById('f_cover').value = covers[Math.floor(Math.random() * covers.length)];
+}
+
+async function rescanR2() {
+  const r = await fetch('/api/seed', { method: 'POST' });
+  const d = await r.json();
+  alert(`R2 scan terminé : ${d.imported} importés sur ${d.found} trouvés.`);
+  loadTracks();
+}
+
+let cachedOrders = [];
+let selectedDeliveryOrderId = null;
+
+async function loadOrders() {
+  const pass = getAdminPass();
+  try {
+    const res = await fetch('/api/orders', { headers: { 'x-admin-pass': pass } });
+    if(!res.ok) return;
+    const orders = await res.json();
+    cachedOrders = orders || [];
+    document.getElementById('orderCount').textContent = cachedOrders.length + ' orders';
+    renderOrders(cachedOrders);
+    updateSalesStats(cachedOrders);
+    populateDeliveryOrdersDropdown();
+  } catch(e) { console.error(e); }
+}
+
+function updateSalesStats(orders) {
+  const total = orders.length;
+  const pending = orders.filter(o => o.status === 'pending').length;
+  const approved = orders.filter(o => o.status === 'approved').length;
+  const ca = orders.reduce((sum, o) => sum + (o.price || 0), 0);
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statPending').textContent = pending;
+  document.getElementById('statApproved').textContent = approved;
+  document.getElementById('statCA').textContent = ca.toFixed(2) + ' $';
+}
+
+function renderOrders(orders) {
+  const el = document.getElementById('ordersList');
+  if(!el) return;
+  el.innerHTML = orders.map(o => `
+    <div style="background:#11131c;border:1px solid #2a3142;border-radius:12px;padding:14px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <div>
+          <b style="color:#fff;font-size:15px">${escapeHtml(o.title || 'Studio Master Order')}</b> 
+          <span style="color:var(--gold-light);font-weight:800;font-size:14px;margin-left:6px">($${(o.price || 0).toFixed(2)})</span>
+          <span class="badge" style="background:${o.status==='approved'?'#22c55e22':'#f59e0b22'};color:${o.status==='approved'?'#4ade80':'#fbbf24'};border:1px solid ${o.status==='approved'?'#22c55e':'#f59e0b'};margin-left:8px;font-weight:800">
+            ${o.status === 'approved' ? '✅ Approved' : '⏳ Awaiting Verification'}
+          </span>
+          ${o.paymentMethod ? `<span class="badge" style="background:#3b82f622;color:#60a5fa;border:1px solid #3b82f6;margin-left:4px;font-size:10px">${escapeHtml(o.paymentMethod)}</span>` : ''}
+        </div>
+        <div style="font-size:12px;color:#94a3b8">${new Date(o.createdAt).toLocaleString()}</div>
+      </div>
+      <div style="font-size:13px;margin-top:8px;color:#e2e8f0">
+        Customer: <b style="color:var(--gold-light)">${escapeHtml(o.buyerName ? o.buyerName + ' <' + o.email + '>' : o.email)}</b>
+      </div>
+      ${o.txHash ? `<div style="font-size:11px;font-family:monospace;background:#000;border:1px solid #333;padding:6px 10px;border-radius:6px;margin-top:6px;color:#fbbf24;word-break:break-all">TXID / Reference: ${escapeHtml(o.txHash)}</div>` : ''}
+      ${o.customTracks ? `<div style="font-size:12px;margin-top:6px;background:#171a26;border:1px solid #22293a;padding:8px;border-radius:6px;color:#cbd5e1"><b>Purchased Track(s):</b> ${escapeHtml(o.customTracks)}</div>` : ''}
+      <div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="btn btn-sm btn-dark" onclick="openOrderDelivery('${o.id}')" style="border:1px solid #f59e0b;color:#fbbf24;font-weight:700">💿 Stock WAV / Delivery Files</button>
+        ${o.status === 'pending' ? `
+          <button class="btn btn-sm btn-green" onclick="approveOrder('${o.id}')" style="background:#22c55e;color:#000;font-weight:800;border:none">⚡ Approve &amp; Activate 24h</button>
+        ` : `
+          <span style="color:#22c55e;font-size:12px;font-weight:700">Active 24h Link:</span>
+          <a href="/api/download/${o.downloadToken}" target="_blank" style="color:var(--gold-light);font-size:12px;text-decoration:underline;font-weight:700">Direct Download</a>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText('${location.origin}/api/download/${o.downloadToken}');alert('Link copied to clipboard!')">Copy Link</button>
+        `}
+        <button class="btn btn-sm btn-red" onclick="deleteOrder('${o.id}')" title="Delete Order">🗑️</button>
+      </div>
+    </div>
+  `).join('') || '<div style="color:#94a3b8;text-align:center;padding:24px">No orders recorded yet.</div>';
+}
+
+/* =========================================================
+   INDIVIDUAL ORDER DELIVERY MANAGEMENT (TAB STOCK WAV)
+========================================================= */
+function populateDeliveryOrdersDropdown() {
+  const select = document.getElementById('deliveryOrderSelect');
+  if(!select) return;
+  const currentVal = select.value;
+  select.innerHTML = '<option value="">-- Select an order to prepare files --</option>' + cachedOrders.map(o => {
+    const trackLabel = o.customTracks || o.title || 'Studio Master';
+    const statusIcon = o.status === 'approved' ? '✅' : '⏳';
+    return `<option value="${o.id}">${statusIcon} [${o.id}] ${trackLabel} — $${(o.price||0).toFixed(2)} (${o.email})</option>`;
+  }).join('');
+  if(currentVal && cachedOrders.some(o => o.id === currentVal)) {
+    select.value = currentVal;
+  } else if(!currentVal && cachedOrders.length > 0) {
+    // Select first order by default
+    select.value = cachedOrders[0].id;
+    onSelectDeliveryOrder();
+  }
+}
+
+function refreshDeliveryOrders() {
+  loadOrders();
+}
+
+function openOrderDelivery(orderId) {
+  // Switch to Stock tab
+  const stockBtn = document.querySelectorAll('.tab-btn')[4]; // 5th button is tab-stock
+  if(stockBtn) showTab('stock', stockBtn);
+  const select = document.getElementById('deliveryOrderSelect');
+  if(select) {
+    select.value = orderId;
+    onSelectDeliveryOrder();
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function onSelectDeliveryOrder() {
+  const select = document.getElementById('deliveryOrderSelect');
+  const orderId = select ? select.value : '';
+  selectedDeliveryOrderId = orderId;
+
+  const banner = document.getElementById('selectedOrderBanner');
+  const activeBox = document.getElementById('deliveryActiveLinkBox');
+  if(!orderId) {
+    if(banner) banner.style.display = 'none';
+    if(activeBox) activeBox.style.display = 'none';
+    resetDeliverySlots();
+    return;
+  }
+
+  const order = cachedOrders.find(o => o.id === orderId);
+  if(order && banner) {
+    banner.style.display = 'block';
+    document.getElementById('bannerOrderId').textContent = order.id;
+    const badge = document.getElementById('bannerOrderStatusBadge');
+    badge.textContent = order.status === 'approved' ? '✅ Approved' : '⏳ Awaiting Verification';
+    badge.style.background = order.status === 'approved' ? '#22c55e22' : '#f59e0b22';
+    badge.style.color = order.status === 'approved' ? '#4ade80' : '#fbbf24';
+    badge.style.border = '1px solid ' + (order.status === 'approved' ? '#22c55e' : '#f59e0b');
+    document.getElementById('bannerOrderDate').textContent = new Date(order.createdAt).toLocaleString();
+    document.getElementById('bannerCustomerEmail').textContent = order.buyerName ? `${order.buyerName} <${order.email}>` : order.email;
+    document.getElementById('bannerTrackName').textContent = order.customTracks || order.title;
+    document.getElementById('bannerOrderPrice').textContent = '$' + (order.price || 0).toFixed(2);
+    const txRow = document.getElementById('bannerTxidRow');
+    if(order.txHash) {
+      txRow.innerHTML = `<b>TXID / Payment Reference:</b> ${escapeHtml(order.txHash)} (${order.paymentMethod || 'Crypto'})`;
+      txRow.style.display = 'block';
+    } else {
+      txRow.style.display = 'none';
+    }
+  }
+
+  await loadOrderDeliveryFiles(orderId);
+}
+
+function resetDeliverySlots() {
+  document.getElementById('statusBadgeWav').className = 'badge';
+  document.getElementById('statusBadgeWav').textContent = '❌ Missing';
+  document.getElementById('statusBadgeWav').style.background = '#ef444422';
+  document.getElementById('statusBadgeWav').style.color = '#f87171';
+  document.getElementById('statusBadgeWav').style.border = '1px solid #ef4444';
+  document.getElementById('fileInfoWav').textContent = 'No WAV uploaded yet.';
+  document.getElementById('btnDeleteWav').style.display = 'none';
+
+  document.getElementById('statusBadgeMp3').className = 'badge';
+  document.getElementById('statusBadgeMp3').textContent = '❌ Missing';
+  document.getElementById('statusBadgeMp3').style.background = '#ef444422';
+  document.getElementById('statusBadgeMp3').style.color = '#f87171';
+  document.getElementById('statusBadgeMp3').style.border = '1px solid #ef4444';
+  document.getElementById('fileInfoMp3').textContent = 'No MP3 uploaded yet.';
+  document.getElementById('btnDeleteMp3').style.display = 'none';
+
+  document.getElementById('statusBadgeLicense').className = 'badge';
+  document.getElementById('statusBadgeLicense').textContent = '❌ Missing';
+  document.getElementById('statusBadgeLicense').style.background = '#ef444422';
+  document.getElementById('statusBadgeLicense').style.color = '#f87171';
+  document.getElementById('statusBadgeLicense').style.border = '1px solid #ef4444';
+  document.getElementById('fileInfoLicense').textContent = 'No PDF uploaded yet.';
+  document.getElementById('btnDeleteLicense').style.display = 'none';
+
+  document.getElementById('summaryTrackName').textContent = '—';
+  document.getElementById('summaryWavStatus').textContent = '❌';
+  document.getElementById('summaryMp3Status').textContent = '❌';
+  document.getElementById('summaryLicStatus').textContent = '❌';
+}
+
+async function loadOrderDeliveryFiles(orderId) {
+  const pass = getAdminPass();
+  try {
+    const res = await fetch(`/api/orders/${orderId}/files`, { headers: { 'x-admin-pass': pass } });
+    if(!res.ok) return;
+    const d = await res.json();
+
+    const trackName = d.trackName || 'Studio Master';
+    document.getElementById('summaryTrackName').textContent = trackName;
+
+    // WAV Slot
+    const badgeWav = document.getElementById('statusBadgeWav');
+    const infoWav = document.getElementById('fileInfoWav');
+    const btnDelWav = document.getElementById('btnDeleteWav');
+    if(d.hasWav && d.wav) {
+      badgeWav.textContent = '✅ Ready';
+      badgeWav.style.background = '#22c55e22'; badgeWav.style.color = '#4ade80'; badgeWav.style.border = '1px solid #22c55e';
+      infoWav.innerHTML = `<b>${escapeHtml(d.wav.filename)}</b> (${(d.wav.size/1024/1024).toFixed(2)} MB)`;
+      btnDelWav.style.display = 'inline-block';
+      document.getElementById('summaryWavStatus').textContent = '✅';
+    } else {
+      badgeWav.textContent = '❌ Missing';
+      badgeWav.style.background = '#ef444422'; badgeWav.style.color = '#f87171'; badgeWav.style.border = '1px solid #ef4444';
+      infoWav.textContent = 'Select and upload the 24-Bit Master WAV.';
+      btnDelWav.style.display = 'none';
+      document.getElementById('summaryWavStatus').textContent = '❌';
+    }
+
+    // MP3 Slot
+    const badgeMp3 = document.getElementById('statusBadgeMp3');
+    const infoMp3 = document.getElementById('fileInfoMp3');
+    const btnDelMp3 = document.getElementById('btnDeleteMp3');
+    if(d.hasMp3 && d.mp3) {
+      badgeMp3.textContent = '✅ Ready';
+      badgeMp3.style.background = '#22c55e22'; badgeMp3.style.color = '#4ade80'; badgeMp3.style.border = '1px solid #22c55e';
+      infoMp3.innerHTML = `<b>${escapeHtml(d.mp3.filename)}</b> (${(d.mp3.size/1024/1024).toFixed(2)} MB)`;
+      btnDelMp3.style.display = 'inline-block';
+      document.getElementById('summaryMp3Status').textContent = '✅';
+    } else {
+      badgeMp3.textContent = '❌ Missing';
+      badgeMp3.style.background = '#ef444422'; badgeMp3.style.color = '#f87171'; badgeMp3.style.border = '1px solid #ef4444';
+      infoMp3.textContent = 'Select and upload the 320kbps MP3 audio.';
+      btnDelMp3.style.display = 'none';
+      document.getElementById('summaryMp3Status').textContent = '❌';
+    }
+
+    // License PDF Slot
+    const badgeLic = document.getElementById('statusBadgeLicense');
+    const infoLic = document.getElementById('fileInfoLicense');
+    const btnDelLic = document.getElementById('btnDeleteLicense');
+    if(d.hasLicense && d.license) {
+      badgeLic.textContent = '✅ Ready';
+      badgeLic.style.background = '#22c55e22'; badgeLic.style.color = '#4ade80'; badgeLic.style.border = '1px solid #22c55e';
+      infoLic.innerHTML = `<b>${escapeHtml(d.license.filename)}</b> (${(d.license.size/1024).toFixed(1)} KB)`;
+      btnDelLic.style.display = 'inline-block';
+      document.getElementById('summaryLicStatus').textContent = '✅';
+    } else {
+      badgeLic.textContent = '❌ Missing';
+      badgeLic.style.background = '#ef444422'; badgeLic.style.color = '#f87171'; badgeLic.style.border = '1px solid #ef4444';
+      infoLic.textContent = 'Upload custom PDF or click "✨ Auto PDF" to generate certificate.';
+      btnDelLic.style.display = 'none';
+      document.getElementById('summaryLicStatus').textContent = '❌';
+    }
+
+    // Active Link Box
+    const activeBox = document.getElementById('deliveryActiveLinkBox');
+    if(d.status === 'approved' && d.downloadToken) {
+      activeBox.style.display = 'block';
+      const dlUrl = `${location.origin}/api/download/${d.downloadToken}`;
+      document.getElementById('inputDownloadUrl').value = dlUrl;
+      document.getElementById('btnDirectDownloadLink').href = dlUrl;
+      const expDate = d.tokenExpiresAt ? new Date(d.tokenExpiresAt).toLocaleString() : '24 hours';
+      document.getElementById('deliveryExpiresLabel').textContent = `Expires on: ${expDate}`;
+    } else {
+      activeBox.style.display = 'none';
+    }
+  } catch(e) { console.error(e); }
+}
+
+async function uploadOrderFileSlot(type) {
+  if(!selectedDeliveryOrderId) { alert('Please select an order first.'); return; }
+  let inputId = 'orderWavFile';
+  if(type === 'mp3') inputId = 'orderMp3File';
+  else if(type === 'license') inputId = 'orderLicenseFile';
+
+  const fileInput = document.getElementById(inputId);
+  const file = fileInput ? fileInput.files[0] : null;
+  if(!file) { alert(`Please select a ${type.toUpperCase()} file to upload.`); return; }
+
+  const pass = getAdminPass();
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('type', type);
+
+  const res = await fetch(`/api/orders/${selectedDeliveryOrderId}/files`, {
+    method: 'POST',
+    headers: { 'x-admin-pass': pass },
+    body: fd
+  });
+  const d = await res.json();
+  if(d.success) {
+    alert(`✅ ${type.toUpperCase()} file uploaded successfully: ${d.filename}`);
+    fileInput.value = '';
+    loadOrderDeliveryFiles(selectedDeliveryOrderId);
+  } else {
+    alert('Upload failed: ' + (d.error || 'Server error'));
+  }
+}
+
+async function generateOfficialOrderLicense() {
+  if(!selectedDeliveryOrderId) { alert('Please select an order first.'); return; }
+  const pass = getAdminPass();
+  const res = await fetch(`/api/orders/${selectedDeliveryOrderId}/generate-license`, {
+    method: 'POST',
+    headers: { 'x-admin-pass': pass }
+  });
+  const d = await res.json();
+  if(d.success) {
+    alert(`✅ Official Commercial License PDF generated for this order!`);
+    loadOrderDeliveryFiles(selectedDeliveryOrderId);
+  } else {
+    alert('Failed to generate license: ' + (d.error || 'Server error'));
+  }
+}
+
+async function deleteOrderFileSlot(type) {
+  if(!selectedDeliveryOrderId) return;
+  if(!confirm(`Remove the ${type.toUpperCase()} file for this order?`)) return;
+  const pass = getAdminPass();
+  await fetch(`/api/orders/${selectedDeliveryOrderId}/files?type=${type}`, {
+    method: 'DELETE',
+    headers: { 'x-admin-pass': pass }
+  });
+  loadOrderDeliveryFiles(selectedDeliveryOrderId);
+}
+
+async function activateOrderDelivery() {
+  if(!selectedDeliveryOrderId) { alert('Please select an order first.'); return; }
+  const pass = getAdminPass();
+  const res = await fetch(`/api/orders/${selectedDeliveryOrderId}/activate-download`, {
+    method: 'POST',
+    headers: { 'x-admin-pass': pass }
+  });
+  const d = await res.json();
+  if(d.success && d.downloadUrl) {
+    alert(`✅ Order approved and 24h Master Pack created!\n\nDirect Download Link:\n${d.downloadUrl}\n\nClient has 24 hours to download their individual order package.`);
+    loadOrderDeliveryFiles(selectedDeliveryOrderId);
+    loadOrders();
+  } else {
+    alert('Activation failed: ' + (d.error || 'Server error'));
+  }
+}
+
+function copyDeliveryUrl() {
+  const input = document.getElementById('inputDownloadUrl');
+  if(!input || !input.value) return;
+  navigator.clipboard.writeText(input.value);
+  alert('✅ 24h Download link copied to clipboard!');
+}
+
+async function approveOrder(id) {
+  const pass = getAdminPass();
+  const res = await fetch(`/api/orders/${id}/approve`, { method: 'PUT', headers: { 'x-admin-pass': pass } });
+  const d = await res.json();
+  if(d.downloadUrl) {
+    alert('✅ Order approved!\nClient download link: ' + d.downloadUrl);
+  }
+  loadOrders();
+  if(selectedDeliveryOrderId === id) {
+    loadOrderDeliveryFiles(id);
+  }
+}
+
+async function deleteOrder(id) {
+  if(!confirm('Delete this order?')) return;
+  const pass = getAdminPass();
+  await fetch(`/api/orders/${id}`, { method: 'DELETE', headers: { 'x-admin-pass': pass } });
+  loadOrders();
+  if(selectedDeliveryOrderId === id) {
+    selectedDeliveryOrderId = null;
+    resetDeliverySlots();
+  }
+}
+
+async function exportCSV() {
+  const pass = getAdminPass();
+  const res = await fetch('/api/orders/export', { headers: { 'x-admin-pass': pass } });
+  if(!res.ok) { alert('Export error'); return; }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'fallen75-orders.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+async function loadStock() {
+  const pass = getAdminPass();
+  const r = await fetch('/api/stock', { headers: { 'x-admin-pass': pass } });
+  const data = await r.json();
+  const el = document.getElementById('stockList');
+  if(!data || data.length === 0) {
+    el.innerHTML = 'Stock vide.';
+    return;
+  }
+  el.innerHTML = data.map(f => `
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #222">
+      <div><b>${f.key}</b> (${(f.size/1024/1024).toFixed(2)} MB)</div>
+      <div style="font-size:11px;opacity:.6">${new Date(f.uploaded).toLocaleString()}</div>
+    </div>
+  `).join('');
+}
+
+async function uploadStock() {
+  const file = document.getElementById('stockFile').files[0];
+  if(!file) { alert('Choisir un fichier'); return; }
+  const prefix = document.getElementById('uploadPrefix').value;
+  const pass = getAdminPass();
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('prefix', prefix);
+  const r = await fetch('/api/upload', { method: 'POST', headers: { 'x-admin-pass': pass }, body: fd });
+  const d = await r.json();
+  if(d.publicUrl) {
+    alert('✅ Fichier déposé avec succès : ' + d.key);
+    loadStock();
+  }
+}
+
+async function clearTransit() {
+  if(!confirm('Voulez-vous vider tous les fichiers de la zone transit/ ?')) return;
+  const pass = getAdminPass();
+  await fetch('/api/stock/clear-transit', { method: 'POST', headers: { 'x-admin-pass': pass } });
+  alert('Zone de transit vidée.');
+  loadStock();
+}
+
+async function loadTelemetry() {
+  const pass = getAdminPass();
+  try {
+    const res = await fetch('/api/telemetry/stats', { headers: { 'x-admin-pass': pass } });
+    if(!res.ok) return;
+    const d = await res.json();
+    document.getElementById('statVisitsTotal').textContent = d.totalVisits ?? d.visitsTotal ?? 0;
+    document.getElementById('statVisitsToday').textContent = d.todayVisits ?? d.visitsToday ?? 0;
+    document.getElementById('statSearchesTotal').textContent = d.totalSearches ?? d.searchesTotal ?? 0;
+    document.getElementById('statListensTotal').textContent = d.totalListens ?? d.listensTotal ?? 0;
+    const likesEl = document.getElementById('statLikesTotal');
+    if(likesEl) likesEl.textContent = d.totalLikes ?? d.likesTotal ?? 0;
+
+    const topTracksEl = document.getElementById('topTracksList');
+    if(topTracksEl) {
+      const tracks = Array.isArray(d.topTracks) ? d.topTracks : [];
+      if(tracks.length > 0) {
+        topTracksEl.innerHTML = tracks.map(t => `
+          <div style="background:#151824;border:1px solid #232a3d;border-radius:8px;padding:10px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+            <div style="overflow:hidden">
+              <div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff">${escapeHtml(t.title || 'Studio Master')}</div>
+              <div style="font-size:11px;color:#94a3b8">${escapeHtml(t.category || 'HQ Master')} • $${(parseFloat(t.price)||0.99).toFixed(2)}</div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;white-space:nowrap;font-size:11px">
+              <span class="badge" style="background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3)">❤️ ${t.likes || 0}</span>
+              <span class="badge" style="background:rgba(59,130,246,0.15);color:#60a5fa;border:1px solid rgba(59,130,246,0.3)">🎧 ${t.views || t.plays || 0}</span>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        topTracksEl.innerHTML = '<span style="opacity:.6">Aucune écoute ni like enregistré pour le moment. Dès qu’un visiteur écoute ou like un morceau, il apparaîtra ici.</span>';
+      }
+    }
+
+    const searchesEl = document.getElementById('topSearchesList');
+    if(searchesEl) {
+      const searches = Array.isArray(d.topSearches) ? d.topSearches : [];
+      if(searches.length > 0) {
+        searchesEl.innerHTML = searches.map(s => `<span class="badge" style="background:#1e293b;border:1px solid #334155;padding:4px 8px;border-radius:6px">🔍 ${escapeHtml(s.term)} (${s.count || 1})</span>`).join('');
+      } else {
+        searchesEl.innerHTML = '<span style="opacity:.6">Aucune recherche enregistrée pour l’instant.</span>';
+      }
+    }
+
+    const feedEl = document.getElementById('activityFeedList');
+    if(feedEl) {
+      const activities = Array.isArray(d.recentActivity) ? d.recentActivity : [];
+      if(activities.length > 0) {
+        feedEl.innerHTML = activities.map(act => {
+          let icon = '👀';
+          let label = 'Visite de la vitrine';
+          if(act.type === 'search') { icon = '🔍'; label = `Recherche: <b>${escapeHtml(act.term || '')}</b>`; }
+          else if(act.type === 'listen') { icon = '🎧'; label = `Écoute: <b>${escapeHtml(act.term || '')}</b>`; }
+          else if(act.type === 'like') { icon = '❤️'; label = `Like: <b>${escapeHtml(act.term || '')}</b>`; }
+          const timeStr = act.createdAt ? new Date(act.createdAt).toLocaleString() : '';
+          return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #1e2538;gap:8px">
+            <div>${icon} ${label}</div>
+            <div style="opacity:.6;font-size:11px;white-space:nowrap">${timeStr}</div>
+          </div>`;
+        }).join('');
+      } else {
+        feedEl.innerHTML = '<span style="opacity:.6">Aucune activité enregistrée pour le moment.</span>';
+      }
+    }
+  } catch(e) { console.error(e); }
+}
+
+async function clearTelemetry() {
+  if(!confirm('Effacer tout l’historique des visites et réinitialiser les compteurs de test (135 écoutes / 4 likes) à 0 ?')) return;
+  const pass = getAdminPass();
+  await fetch('/api/telemetry/clear', { method: 'POST', headers: { 'x-admin-pass': pass } });
+  alert('✅ Compteurs et historique réinitialisés à 0.');
+  loadTelemetry();
+  loadTracks();
+}
+
+loadAll();
+
+// Auto refresh telemetry every 8 seconds if visitors tab is active
+setInterval(() => {
+  const tab = document.getElementById('tab-visitors');
+  if(tab && tab.classList.contains('active')) {
+    loadTelemetry();
+  }
+}, 8000);
+</script>
+</body>
+</html>

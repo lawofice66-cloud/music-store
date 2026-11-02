@@ -80,9 +80,11 @@ function loadDatabase(): DatabaseSchema {
               ...(data.paymentConfig?.otherMethods || {}),
               redotpay: INITIAL_PAYMENT_CONFIG.otherMethods.redotpay,
               skrill: INITIAL_PAYMENT_CONFIG.otherMethods.skrill,
-              payoneer: INITIAL_PAYMENT_CONFIG.otherMethods.payoneer,
             },
           };
+          if (data.paymentConfig?.otherMethods?.payoneer) {
+            delete (data.paymentConfig.otherMethods as any).payoneer;
+          }
           changed = true;
         }
 

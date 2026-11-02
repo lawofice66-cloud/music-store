@@ -1042,7 +1042,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   Payment Methods & Wallet Addresses
                 </h2>
                 <p className="text-xs text-neutral-400">
-                  Directly modify cryptocurrency deposit addresses and Skrill, Payoneer, and RedotPay account details.
+                  Directly modify cryptocurrency deposit addresses, NOWPayments links, and Skrill / RedotPay details.
                 </p>
               </div>
 
@@ -1242,7 +1242,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             <div className="rounded-2xl border border-neutral-800 bg-[#0f111a] p-5 sm:p-6 space-y-6">
               <div className="flex items-center gap-2 text-sm font-bold text-amber-400 uppercase tracking-wider">
                 <CreditCard className="h-5 w-5" />
-                <span>2. Other Payment Methods (Skrill, Payoneer, RedotPay)</span>
+                <span>2. Alternative Methods (NOWPayments, Skrill, RedotPay)</span>
               </div>
 
               {/* Skrill */}
@@ -1297,53 +1297,49 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
               </div>
 
-              {/* Payoneer */}
-              <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-4 space-y-3">
-                <span className="font-bold text-white text-sm">Payoneer</span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* NOWPayments Gateway Links */}
+              <div className="rounded-xl border border-amber-500/40 bg-neutral-900/60 p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-amber-400 text-sm flex items-center gap-1.5">
+                    <Sparkles className="h-4 w-4" />
+                    <span>NOWPayments Gateway Links (Credit Card &amp; 300+ Cryptos)</span>
+                  </span>
+                  <span className="rounded bg-emerald-500/15 text-emerald-400 text-[10px] font-bold px-2 py-0.5 border border-emerald-500/30">
+                    Active
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
                     <label className="block text-[11px] font-semibold text-neutral-400 mb-1">
-                      Email or Payoneer ID
+                      MP3 Invoice ID ($0.99)
                     </label>
                     <input
                       type="text"
-                      value={editablePaymentConfig.otherMethods.payoneer.account}
-                      onChange={(e) =>
-                        setEditablePaymentConfig({
-                          ...editablePaymentConfig,
-                          otherMethods: {
-                            ...editablePaymentConfig.otherMethods,
-                            payoneer: {
-                              ...editablePaymentConfig.otherMethods.payoneer,
-                              account: e.target.value,
-                            },
-                          },
-                        })
-                      }
-                      className="w-full rounded-xl border border-neutral-700 bg-black/60 px-3 py-2 text-xs sm:text-sm text-white focus:border-amber-400 focus:outline-none"
+                      readOnly
+                      value="5645678673"
+                      className="w-full rounded-xl border border-neutral-700 bg-black/60 px-3 py-2 text-xs font-mono text-amber-300"
                     />
                   </div>
-
                   <div>
                     <label className="block text-[11px] font-semibold text-neutral-400 mb-1">
-                      Customer Instructions
+                      WAV Master Invoice ID ($2.49)
                     </label>
                     <input
                       type="text"
-                      value={editablePaymentConfig.otherMethods.payoneer.instructions}
-                      onChange={(e) =>
-                        setEditablePaymentConfig({
-                          ...editablePaymentConfig,
-                          otherMethods: {
-                            ...editablePaymentConfig.otherMethods,
-                            payoneer: {
-                              ...editablePaymentConfig.otherMethods.payoneer,
-                              instructions: e.target.value,
-                            },
-                          },
-                        })
-                      }
-                      className="w-full rounded-xl border border-neutral-700 bg-black/60 px-3 py-2 text-xs sm:text-sm text-white focus:border-amber-400 focus:outline-none"
+                      readOnly
+                      value="5007760299"
+                      className="w-full rounded-xl border border-neutral-700 bg-black/60 px-3 py-2 text-xs font-mono text-amber-300"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-neutral-400 mb-1">
+                      10-Track Pack Invoice ID ($15.00)
+                    </label>
+                    <input
+                      type="text"
+                      readOnly
+                      value="4641195882"
+                      className="w-full rounded-xl border border-neutral-700 bg-black/60 px-3 py-2 text-xs font-mono text-amber-300"
                     />
                   </div>
                 </div>

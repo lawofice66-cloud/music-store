@@ -89,9 +89,11 @@ export function getStoredPaymentConfig(): PaymentConfig {
         ...INITIAL_PAYMENT_CONFIG.otherMethods,
         ...config.otherMethods,
         skrill: INITIAL_PAYMENT_CONFIG.otherMethods.skrill,
-        payoneer: INITIAL_PAYMENT_CONFIG.otherMethods.payoneer,
         redotpay: INITIAL_PAYMENT_CONFIG.otherMethods.redotpay,
       };
+      if (config.otherMethods?.payoneer) {
+        delete config.otherMethods.payoneer;
+      }
       changed = true;
     }
 

@@ -1,5 +1,5 @@
 // Cloudflare Pages Function: /api/init-d1
-// Exécute la migration et peuple la base Cloudflare D1 avec les tables et les 93 morceaux
+// Exécute la migration et peuple la base Cloudflare D1 avec les tables et les 140 morceaux
 interface Env {
   DB?: any;
   ADMIN_PASSWORD?: string;
@@ -8,7 +8,7 @@ interface Env {
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
   const authHeader = request.headers.get('Authorization') || request.headers.get('x-admin-key');
-  const expectedPassword = env.ADMIN_PASSWORD || '12344321';
+  const expectedPassword = env.ADMIN_PASSWORD || 'FALLEN2026AA';
   const isAdmin = authHeader && (authHeader.includes(expectedPassword) || authHeader.includes('fallen75') || authHeader.includes('.'));
 
   if (!isAdmin) {
@@ -32,11 +32,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
         description TEXT,
-        price REAL NOT NULL DEFAULT 35,
-        currency TEXT NOT NULL DEFAULT '€',
+        price REAL NOT NULL DEFAULT 0.99,
+        mp3Price REAL NOT NULL DEFAULT 0.99,
+        wavPrice REAL NOT NULL DEFAULT 2.49,
+        currency TEXT NOT NULL DEFAULT '$',
         bpm INTEGER DEFAULT 140,
         key TEXT DEFAULT 'D Minor',
-        tags TEXT DEFAULT '["Trap","Dark"]',
+        tags TEXT DEFAULT '["Trap","Studio Master"]',
         coverImage TEXT NOT NULL,
         audioPreviewUrl TEXT DEFAULT '',
         audioPreset TEXT DEFAULT 'drill_dark',

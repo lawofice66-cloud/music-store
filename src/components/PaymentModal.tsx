@@ -35,9 +35,9 @@ interface PaymentModalProps {
   onViewOrder: (orderId: string) => void;
 }
 
-type TabType = 'crypto' | 'other';
+type TabType = 'nowpayments' | 'crypto' | 'other';
 type CryptoKey = 'usdtTron' | 'ethereum' | 'solana';
-type OtherKey = 'skrill' | 'payoneer' | 'redotpay';
+type OtherKey = 'skrill' | 'redotpay';
 
 export const PaymentModal: React.FC<PaymentModalProps> = ({
   track,
@@ -50,9 +50,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   if (!isOpen) return null;
 
   const [selectedFormat, setSelectedFormat] = useState<'mp3' | 'wav'>('mp3');
-  const [activeTab, setActiveTab] = useState<TabType>('crypto');
+  const [activeTab, setActiveTab] = useState<TabType>('nowpayments');
   const [selectedCrypto, setSelectedCrypto] = useState<CryptoKey>('usdtTron');
   const [selectedOther, setSelectedOther] = useState<OtherKey>('skrill');
+  const [showWidget, setShowWidget] = useState<boolean>(true);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [copiedMessage, setCopiedMessage] = useState<string | null>(null);
 
@@ -106,9 +107,11 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     setSubmitting(true);
 
     const paymentMethodLabel =
-      activeTab === 'crypto'
+      activeTab === 'nowpayments'
+        ? 'NOWPayments (Card & 300+ Crypto)'
+        : activeTab === 'crypto'
         ? paymentConfig.crypto[selectedCrypto].label
-        : paymentConfig.otherMethods[selectedOther].label;
+        : paymentConfig.otherMethods[selectedOther]?.label || 'Skrill/RedotPay';
 
     setTimeout(() => {
       const newOrder = onSubmitOrder({
@@ -128,7 +131,17 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   };
 
   const currentCrypto = paymentConfig.crypto[selectedCrypto];
-  const currentOther = paymentConfig.otherMethods[selectedOther];
+  const currentOther = paymentConfig.otherMethods[selectedOther] || {
+    label: selectedOther === 'redotpay' ? 'RedotPay (Visa Card)' : 'Skrill',
+    account: selectedOther === 'redotpay' ? 'lawofice66@gmail.com' : 'azzoulaali@hotmail.com',
+    instructions: '',
+    active: true,
+  };
+
+  const nowPaymentsIid = selectedFormat === 'wav' ? '5007760299' : '5645678673';
+  const nowPaymentsPayUrl = `https://nowpayments.io/payment/?iid=${nowPaymentsIid}&source=button`;
+  const nowPaymentsWidgetUrl = `https://nowpayments.io/embeds/payment-widget?iid=${nowPaymentsIid}`;
+  const nowPaymentsDirectUrl = `https://nowpayments.io/payment/?iid=${nowPaymentsIid}`;
 
   return (
     <div
@@ -355,31 +368,180 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
               </label>
             </div>
 
-            {/* Category Tabs: Crypto vs Other */}
-            <div className="flex rounded-xl bg-[#0a0b10] p-1 border border-neutral-800">
+            {/* Category Tabs: NOWPayments vs Crypto vs Other */}
+            <div className="flex flex-wrap gap-1.5 rounded-xl bg-[#0a0b10] p-1 border border-neutral-800">
               <button
                 type="button"
+                id="tab-btn-nowpayments"
+                onClick={() => setActiveTab('nowpayments')}
+                className={`flex-1 min-w-[140px] rounded-lg py-2 px-3 text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                  activeTab === 'nowpayments'
+                    ? 'bg-amber-500 text-black shadow-md'
+                    : 'text-neutral-400 hover:text-white'
+                }`}
+              >
+                ⚡ NOWPayments (Card &amp; 300+ Crypto)
+              </button>
+              <button
+                type="button"
+                id="tab-btn-crypto"
                 onClick={() => setActiveTab('crypto')}
-                className={`flex-1 rounded-lg py-2 text-xs sm:text-sm font-bold transition-all ${
+                className={`flex-1 min-w-[140px] rounded-lg py-2 px-3 text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                   activeTab === 'crypto'
                     ? 'bg-amber-500 text-black shadow-md'
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >
-                1. Crypto Payment (Recommended)
+                💰 Direct Crypto (USDT, ETH, SOL)
               </button>
               <button
                 type="button"
+                id="tab-btn-other"
                 onClick={() => setActiveTab('other')}
-                className={`flex-1 rounded-lg py-2 text-xs sm:text-sm font-bold transition-all ${
+                className={`flex-1 min-w-[140px] rounded-lg py-2 px-3 text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                   activeTab === 'other'
                     ? 'bg-amber-500 text-black shadow-md'
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >
-                2. Other Methods (Skrill, Payoneer, RedotPay)
+                💳 Skrill &amp; RedotPay Visa
               </button>
             </div>
+
+            {/* NOWPAYMENTS TAB CONTENT */}
+            {activeTab === 'nowpayments' && (
+              <div className="space-y-4">
+                <div className="rounded-xl border border-amber-500/40 bg-gradient-to-b from-[#131522] to-[#0a0c14] p-4 sm:p-5 space-y-4">
+                  <div className="flex items-center justify-between flex-wrap gap-2 border-b border-neutral-800 pb-3">
+                    <div>
+                      <b className="text-amber-300 text-sm sm:text-base font-extrabold flex items-center gap-1.5">
+                        <Sparkles className="h-4 w-4 text-amber-400" />
+                        <span>NOWPayments Instant Gateway</span>
+                      </b>
+                      <div className="text-xs text-neutral-400 mt-0.5">
+                        Accepts Credit Card (Visa/Mastercard) + 300+ Cryptos (BTC, ETH, USDT, SOL, LTC, DOGE...)
+                      </div>
+                    </div>
+                    <span className="rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 text-xs font-bold">
+                      Instant Live Rates
+                    </span>
+                  </div>
+
+                  {/* Selected Format & Price recap */}
+                  <div className="flex items-center justify-between rounded-lg bg-black/60 border border-neutral-800 p-3">
+                    <div>
+                      <span className="text-[11px] text-neutral-400 block">Selected Studio Master:</span>
+                      <strong className="text-xs sm:text-sm text-white font-semibold">{track.title}</strong>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] uppercase font-mono text-neutral-400 block">{selectedFormat.toUpperCase()} License</span>
+                      <span className="text-base sm:text-lg font-black text-amber-400 font-mono">${currentPrice.toFixed(2)} USD</span>
+                    </div>
+                  </div>
+
+                  {/* Official NOWPayments Pay Buttons (White & Black) */}
+                  <div className="text-center rounded-xl bg-[#07080d] border border-neutral-800 p-4 space-y-3">
+                    <div className="text-xs font-bold text-neutral-300">
+                      Click below to pay via NOWPayments official gateway:
+                    </div>
+                    <div className="flex items-center justify-center flex-wrap gap-4 py-1">
+                      {/* White button */}
+                      <a
+                        href={nowPaymentsPayUrl}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="inline-block transition-transform hover:scale-105 active:scale-95"
+                      >
+                        <img
+                          src="https://nowpayments.io/images/embeds/payments-button-white.svg"
+                          alt="Crypto payment button by NOWPayments"
+                          className="h-11 sm:h-12 rounded-lg shadow-lg"
+                        />
+                      </a>
+                      {/* Black button */}
+                      <a
+                        href={nowPaymentsPayUrl}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="inline-block transition-transform hover:scale-105 active:scale-95"
+                      >
+                        <img
+                          src="https://nowpayments.io/images/embeds/payments-button-black.svg"
+                          alt="Crypto payment button by NOWPayments"
+                          className="h-11 sm:h-12 rounded-lg shadow-lg"
+                        />
+                      </a>
+                    </div>
+
+                    {/* Direct Link + Copy button */}
+                    <div className="flex items-center justify-center gap-2 flex-wrap pt-2">
+                      <input
+                        readOnly
+                        value={nowPaymentsDirectUrl}
+                        className="rounded-lg border border-neutral-800 bg-black/80 px-3 py-2 text-xs font-mono text-amber-300 select-all w-64 text-center"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(nowPaymentsDirectUrl, 'np-link', '✓ NOWPayments payment link copied!')}
+                        className="flex items-center gap-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 px-3 py-2 text-xs font-bold text-white transition-all cursor-pointer border border-neutral-700"
+                      >
+                        <Copy className="h-3.5 w-3.5 text-amber-400" />
+                        <span>Copy Link</span>
+                      </button>
+                      <a
+                        href={nowPaymentsDirectUrl}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="flex items-center gap-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 px-3 py-2 text-xs font-extrabold text-black transition-all shadow-md"
+                      >
+                        <span>🚀 Open Gateway</span>
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </a>
+                    </div>
+                    {copiedMessage && copiedKey === 'np-link' && (
+                      <div className="rounded-lg bg-emerald-500/20 border border-emerald-500/40 p-1.5 text-center text-xs font-bold text-emerald-300">
+                        {copiedMessage}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Interactive Widget section */}
+                  <div className="rounded-xl bg-[#07080d] border border-neutral-800 p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-neutral-300">
+                        📱 Embedded NOWPayments Widget:
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setShowWidget(!showWidget)}
+                        className="text-[11px] text-amber-400 hover:text-amber-300 font-bold cursor-pointer"
+                      >
+                        {showWidget ? 'Collapse Widget 🔼' : 'Expand Widget 🔽'}
+                      </button>
+                    </div>
+                    {showWidget && (
+                      <div className="flex justify-center overflow-hidden rounded-lg bg-black border border-neutral-800 p-2">
+                        <iframe
+                          src={nowPaymentsWidgetUrl}
+                          width="410"
+                          height="640"
+                          frameBorder="0"
+                          scrolling="no"
+                          style={{ overflowY: 'hidden', maxWidth: '100%', border: 'none', borderRadius: '8px' }}
+                          title="NOWPayments Widget"
+                        >
+                          Can't load widget
+                        </iframe>
+                      </div>
+                    )}
+                  </div>
+
+                  <p className="text-[11px] text-neutral-400 text-center">
+                    💡 After completing payment on NOWPayments, copy your Payment ID or Transaction Hash (TXID) and paste it into Step 3 below.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* CRYPTO TAB CONTENT */}
             {activeTab === 'crypto' && (
@@ -497,15 +659,16 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             {activeTab === 'other' && (
               <div className="space-y-4">
                 {/* Method selector */}
-                <div className="grid grid-cols-3 gap-2">
-                  {(['skrill', 'payoneer', 'redotpay'] as OtherKey[]).map((key) => {
+                <div className="grid grid-cols-2 gap-2">
+                  {(['skrill', 'redotpay'] as OtherKey[]).map((key) => {
                     const method = paymentConfig.otherMethods[key];
+                    if (!method) return null;
                     return (
                       <button
                         key={key}
                         type="button"
                         onClick={() => setSelectedOther(key)}
-                        className={`rounded-xl p-2.5 text-center border transition-all ${
+                        className={`rounded-xl p-2.5 text-center border transition-all cursor-pointer ${
                           selectedOther === key
                             ? 'border-amber-400 bg-amber-500/15 text-amber-300 font-bold'
                             : 'border-neutral-800 bg-neutral-900/50 text-neutral-400 hover:border-neutral-700'

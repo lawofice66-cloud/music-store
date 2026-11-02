@@ -124,10 +124,10 @@ export const Hero: React.FC<HeroProps> = ({
               FALLEN 75 FRANCE
             </h1>
             <p className="mt-2 text-base sm:text-lg font-medium text-amber-400/90 tracking-wide">
-              Global Catalogue of 90+ Beats & Instrumentals
+              Global Catalogue of 140 Beats & Instrumentals
             </p>
             <p className="mt-3 text-xs sm:text-sm text-neutral-400 leading-relaxed max-w-xl">
-              Official music production catalogue. Stream studio previews live, purchase your license directly via crypto (USDT TRC20, ETH, SOL) or fiat solutions (Skrill, Payoneer, RedotPay), and instantly unlock your uncompressed 24-bit WAV master files.
+              Official music production catalogue. Stream studio previews live, purchase your license directly via NOWPayments (Credit Card &amp; 300+ Crypto), direct crypto (USDT TRC20, ETH, SOL), or Skrill / RedotPay, and instantly unlock your uncompressed 24-bit WAV master files.
             </p>
           </div>
 

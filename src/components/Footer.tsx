@@ -68,14 +68,14 @@ export const Footer: React.FC<FooterProps> = ({
               </span>
             </div>
             <p className="text-xs leading-relaxed text-neutral-400">
-              Independent music production studio & 90+ beat catalog (Drill, Trap, Boom Bap, Cinematic, French Urban). Exclusive & non-exclusive licenses with instant master delivery.
+              Independent music production studio & 140 beat catalog (Drill, Trap, Boom Bap, Cinematic, French Urban). Exclusive & non-exclusive licenses with instant master delivery.
             </p>
             <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[11px] font-mono text-neutral-500">
               <span className="rounded bg-neutral-900 px-2 py-0.5 border border-neutral-800">USDT (TRC20)</span>
               <span className="rounded bg-neutral-900 px-2 py-0.5 border border-neutral-800">Ethereum</span>
-              <span className="rounded bg-neutral-900 px-2 py-0.5 border border-neutral-800">Solana</span>
+              <span className="rounded bg-neutral-900 px-2 py-0.5 border border-amber-500/30 text-amber-300 font-bold">NOWPayments</span>
+              <span className="rounded bg-neutral-900 px-2 py-0.5 border border-neutral-800">Credit Card</span>
               <span className="rounded bg-neutral-900 px-2 py-0.5 border border-neutral-800">Skrill</span>
-              <span className="rounded bg-neutral-900 px-2 py-0.5 border border-neutral-800">Payoneer</span>
               <span className="rounded bg-neutral-900 px-2 py-0.5 border border-neutral-800">RedotPay</span>
             </div>
           </div>
@@ -220,7 +220,7 @@ export const Footer: React.FC<FooterProps> = ({
             <ul className="space-y-1.5 text-xs">
               <li>
                 <a href="#catalogue" className="hover:text-amber-400 transition-colors">
-                  Full Catalog (90+ Beats)
+                  Full Catalog (140 Beats)
                 </a>
               </li>
               <li>

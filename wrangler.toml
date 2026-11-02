@@ -20,6 +20,12 @@ database_id = "812c3d47-fcbe-44fa-91ab-e5514cc5c7e5"
 binding = "R2_BUCKET"
 bucket_name = "music-2026"
 
+# Cloudflare KV Storage (Persistent Play & Like Counters)
+[[kv_namespaces]]
+binding = "KV"
+id = "FALLEN75_KV"
+
 [vars]
 CF_R2_PUBLIC_URL = "https://pub-32ecd1e71ab848fdacff0b89e5c8bb4e.r2.dev"
 ADMIN_PASSWORD = "FALLEN2026AA"
+SITE_URL = "https://fallen75.com"

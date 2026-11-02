@@ -105,7 +105,7 @@ export const CloudflareGuideModal: React.FC<CloudflareGuideModalProps> = ({
               </span>
             </div>
             <p className="text-neutral-300 text-xs leading-relaxed">
-              Téléchargez le package complet prêt pour Cloudflare Pages (Frontend + Pages Functions + D1 + R2 + Schéma SQL des 93 morceaux) :
+              Téléchargez le package complet prêt pour Cloudflare Pages (Frontend + Pages Functions + D1 + R2 + Schéma SQL des 140 morceaux) :
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
@@ -125,7 +125,7 @@ export const CloudflareGuideModal: React.FC<CloudflareGuideModalProps> = ({
                     <Download className="h-4 w-4 group-hover:translate-y-0.5 transition-transform" />
                   </div>
                   <p className="text-[11px] font-semibold text-black/80 leading-snug">
-                    Assets compilés (HTML/JS/CSS) + dossier <code>/functions</code> (API D1/R2, Auth, Upload, Streaming, Download) + <code>schema.sql</code> (93 morceaux) + <code>wrangler.toml</code>.
+                    Assets compilés (HTML/JS/CSS) + dossier <code>/functions</code> (API D1/R2, Auth, Upload, Streaming, Download) + <code>schema.sql</code> (140 morceaux) + <code>wrangler.toml</code>.
                   </p>
                 </div>
                 <div className="mt-3 flex items-center justify-between border-t border-black/15 pt-2 text-[10px] font-black text-black/90">
@@ -249,7 +249,7 @@ git push -u origin main
               <li className="flex items-start gap-2.5">
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-emerald-500/20 text-emerald-400 text-xs font-bold mt-0.5">e</span>
                 <div>
-                  <strong>Initialisez la base D1 avec les 93 morceaux</strong> en lançant dans votre terminal :
+                  <strong>Initialisez la base D1 avec les 140 morceaux</strong> en lançant dans votre terminal :
                   <pre className="mt-1.5 rounded-lg bg-black/60 p-2 font-mono text-[11px] text-emerald-300 border border-neutral-800">
 npx wrangler d1 execute fallen75-db --file=./schema.sql
                   </pre>
@@ -280,7 +280,7 @@ npx wrangler d1 execute fallen75-db --file=./schema.sql
 # 1. Installer wrangler et se connecter{'\n'}
 npm install -g wrangler{'\n'}
 wrangler login{'\n\n'}
-# 2. Initialiser la base D1 avec le schéma et les 93 morceaux{'\n'}
+# 2. Initialiser la base D1 avec le schéma et les 140 morceaux{'\n'}
 npx wrangler d1 execute fallen75-db --file=./schema.sql{'\n\n'}
 # 3. Déployer sur Cloudflare Pages avec Functions{'\n'}
 npx wrangler pages deploy dist --project-name=fallen-75-france

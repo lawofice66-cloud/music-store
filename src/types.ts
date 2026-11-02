@@ -68,7 +68,7 @@ export interface PaymentConfig {
       instructions: string;
       active: boolean;
     };
-    payoneer: {
+    payoneer?: {
       label: string;
       account: string;
       instructions: string;
