@@ -133,12 +133,21 @@ export function getTrackById(id: string): Track | undefined {
 export function createTrack(trackData: Omit<Track, 'id'> & { id?: string }): Track {
   const db = loadDatabase();
   const id = trackData.id || `track-${Date.now()}`;
+  const numPrice = trackData.price !== undefined ? Number(trackData.price) : 0.99;
+  const autoStatus: 'released' | 'unreleased' =
+    trackData.status === 'unreleased' || numPrice >= 2.49 ? 'unreleased' : 'released';
+  const autoCategory = trackData.category || autoStatus;
+
   const newTrack: Track = {
     ...trackData,
     id,
+    status: autoStatus,
+    category: autoCategory,
+    price: numPrice,
+    mp3Price: autoStatus === 'unreleased' ? numPrice : (trackData.mp3Price !== undefined ? Number(trackData.mp3Price) : 0.99),
+    wavPrice: trackData.wavPrice !== undefined ? Number(trackData.wavPrice) : 2.49,
     tags: Array.isArray(trackData.tags) ? trackData.tags : ['Beat', 'Trap'],
-    price: Number(trackData.price) || 35,
-    currency: trackData.currency || '€',
+    currency: trackData.currency || '$',
   };
 
   db.tracks = [newTrack, ...db.tracks];
@@ -151,10 +160,21 @@ export function updateTrack(id: string, updates: Partial<Track>): Track | null {
   const index = db.tracks.findIndex((t) => t.id === id);
   if (index === -1) return null;
 
+  const prev = db.tracks[index];
+  const newPrice = updates.price !== undefined ? Number(updates.price) : prev.price;
+  const newStatus: 'released' | 'unreleased' =
+    updates.status ? updates.status : (newPrice >= 2.49 ? 'unreleased' : 'released');
+  const newCategory = updates.category || newStatus;
+
   db.tracks[index] = {
-    ...db.tracks[index],
+    ...prev,
     ...updates,
     id, // protect id
+    status: newStatus,
+    category: newCategory,
+    price: newPrice,
+    mp3Price: newStatus === 'unreleased' ? newPrice : (updates.mp3Price !== undefined ? Number(updates.mp3Price) : prev.mp3Price || 0.99),
+    wavPrice: updates.wavPrice !== undefined ? Number(updates.wavPrice) : prev.wavPrice || 2.49,
   };
   saveDatabase(db);
   return db.tracks[index];

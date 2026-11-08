@@ -497,12 +497,32 @@ function renderAdminTracks(tracks) {
       <div style="color:#f59e0b;font-weight:700">${(t.price || 0.99).toFixed(2)} $</div>
       <div style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.audioPreviewUrl || 'Aucun audio'}</div>
       <div style="font-size:11px">❤️ ${t.likes || 0} | 🎧 ${t.views || 0}</div>
-      <div style="display:flex;gap:6px">
+      <div style="display:flex;gap:6px;align-items:center">
+        ${isUnreleased ? `
+          <button class="btn btn-sm" style="background:rgba(239,68,68,0.2);color:#f87171;border:1px solid rgba(239,68,68,0.3);font-size:11px" onclick="quickSwitchAdminTrack('${t.id || t.slug}', 'released')" title="Déplacer vers la case Released ($0.99 USD)">🔴 $0.99</button>
+        ` : `
+          <button class="btn btn-sm" style="background:rgba(34,197,94,0.2);color:#4ade80;border:1px solid rgba(34,197,94,0.3);font-size:11px" onclick="quickSwitchAdminTrack('${t.id || t.slug}', 'unreleased')" title="Déplacer vers la case Inédite ($2.49 USD)">🟢 $2.49</button>
+        `}
         <button class="btn btn-sm btn-dark" onclick="openTrackEditor(${i})">✏️ Éditer</button>
         <button class="btn btn-sm btn-red" onclick="deleteTrack('${t.id || t.slug}')">🗑️</button>
       </div>
     </div>
   `;}).join('') || '<div style="padding:12px;opacity:.6">Aucun morceau.</div>';
+}
+
+async function quickSwitchAdminTrack(id, targetCase) {
+  const pass = getAdminPass();
+  const price = (targetCase === 'unreleased') ? 2.49 : 0.99;
+  const res = await fetch('/api/tracks/' + encodeURIComponent(id), {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'x-admin-pass': pass },
+    body: JSON.stringify({ price: price, status: targetCase, category: targetCase })
+  });
+  if(res.ok) {
+    loadTracks();
+  } else {
+    alert('Erreur changement de case');
+  }
 }
 
 function renderAdminClips(clips) {
@@ -526,9 +546,10 @@ function openTrackEditor(idx) {
   if(!t) return;
   document.getElementById('modal_t_id').value = t.id || t.slug;
   document.getElementById('modal_t_title').value = t.title || '';
-  document.getElementById('modal_t_price').value = t.price || 0.99;
+  const initialPrice = t.price || 0.99;
+  document.getElementById('modal_t_price').value = initialPrice;
   document.getElementById('modal_t_category').value = t.category || 'francais';
-  document.getElementById('modal_t_status').value = t.status || (t.price >= 2 ? 'unreleased' : 'released');
+  document.getElementById('modal_t_status').value = t.status || (initialPrice >= 2.49 ? 'unreleased' : 'released');
   document.getElementById('modal_t_slug').value = t.slug || '';
   document.getElementById('modal_t_url').value = t.audioPreviewUrl || '';
   document.getElementById('modal_t_cover').value = t.coverImage || t.cover || '';
@@ -543,12 +564,15 @@ function closeTrackModal() {
 async function saveTrackModal() {
   const pass = getAdminPass();
   const id = document.getElementById('modal_t_id').value;
+  const inputPrice = parseFloat(document.getElementById('modal_t_price').value) || 0.99;
+  // Règle stricte : dès qu'un prix est mis, le morceau rejoint automatiquement sa case
+  const autoStatus = inputPrice >= 2.49 ? 'unreleased' : (document.getElementById('modal_t_status').value || 'released');
   const payload = {
     title: document.getElementById('modal_t_title').value.trim(),
     slug: document.getElementById('modal_t_slug').value.trim(),
-    price: parseFloat(document.getElementById('modal_t_price').value) || 0.99,
-    category: document.getElementById('modal_t_category').value,
-    status: document.getElementById('modal_t_status').value,
+    price: inputPrice,
+    category: document.getElementById('modal_t_category').value || autoStatus,
+    status: autoStatus,
     audioPreviewUrl: document.getElementById('modal_t_url').value.trim(),
     coverImage: document.getElementById('modal_t_cover').value.trim(),
     description: document.getElementById('modal_t_desc').value.trim()
@@ -559,7 +583,7 @@ async function saveTrackModal() {
     body: JSON.stringify(payload)
   });
   if(res.ok) {
-    alert('✅ Morceau mis à jour !');
+    alert(`✅ Morceau enregistré dans la case ${autoStatus === 'unreleased' ? 'INÉDITE ($2.49)' : 'RELEASED ($0.99)'} !`);
     closeTrackModal();
     loadTracks();
   } else {
@@ -1167,6 +1191,45 @@ async function clearTelemetry() {
   loadTelemetry();
   loadTracks();
 }
+
+// Synchronisation automatique stricte du prix vers la case (et de la case vers le prix)
+document.addEventListener('DOMContentLoaded', () => {
+  const modalPrice = document.getElementById('modal_t_price');
+  const modalStatus = document.getElementById('modal_t_status');
+  if(modalPrice && modalStatus) {
+    modalPrice.addEventListener('input', () => {
+      const p = parseFloat(modalPrice.value);
+      if(!isNaN(p)) {
+        modalStatus.value = p >= 2.49 ? 'unreleased' : 'released';
+      }
+    });
+    modalStatus.addEventListener('change', () => {
+      if(modalStatus.value === 'unreleased') {
+        modalPrice.value = '2.49';
+      } else if(modalStatus.value === 'released') {
+        modalPrice.value = '0.99';
+      }
+    });
+  }
+
+  const fPrice = document.getElementById('f_price');
+  const fStatus = document.getElementById('f_status');
+  if(fPrice && fStatus) {
+    fPrice.addEventListener('input', () => {
+      const p = parseFloat(fPrice.value);
+      if(!isNaN(p)) {
+        fStatus.value = p >= 2.49 ? 'unreleased' : 'released';
+      }
+    });
+    fStatus.addEventListener('change', () => {
+      if(fStatus.value === 'unreleased') {
+        fPrice.value = '2.49';
+      } else if(fStatus.value === 'released') {
+        fPrice.value = '0.99';
+      }
+    });
+  }
+});
 
 loadAll();
 

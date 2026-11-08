@@ -36,6 +36,7 @@ import { OrderStatusModal } from './components/OrderStatusModal';
 import { AdminPanel } from './components/AdminPanel';
 import { CloudflareGuideModal } from './components/CloudflareGuideModal';
 import { ContactModal } from './components/ContactModal';
+import { LicenseModal } from './components/LicenseModal';
 import { Footer } from './components/Footer';
 import { Music, Disc3, Sparkles, Heart, Flame, ArrowUpDown } from 'lucide-react';
 
@@ -55,7 +56,14 @@ export default function App() {
   const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
   const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false);
+  const [licenseModalTab, setLicenseModalTab] = useState<'released' | 'unreleased'>('released');
   const [trackingOrderId, setTrackingOrderId] = useState<string | undefined>(undefined);
+
+  const handleOpenLicenses = (tab?: 'released' | 'unreleased') => {
+    if (tab) setLicenseModalTab(tab);
+    setIsLicenseModalOpen(true);
+  };
 
   // Store Filtering & Search
   const [searchQuery, setSearchQuery] = useState('');
@@ -345,6 +353,7 @@ export default function App() {
         }}
         onOpenGuide={() => setIsGuideModalOpen(true)}
         onOpenContact={() => setIsContactModalOpen(true)}
+        onOpenLicenses={() => handleOpenLicenses('released')}
         orders={orders}
       />
 
@@ -382,6 +391,7 @@ export default function App() {
             englishCount={englishTracks.length}
             likedCount={likedTrackIds.size}
             onOpenContact={() => setIsContactModalOpen(true)}
+            onOpenLicenses={() => handleOpenLicenses('released')}
           />
 
           {/* Beats Grid Catalogue */}
@@ -469,13 +479,22 @@ export default function App() {
                         </p>
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedTag('unreleased')}
-                      className="self-start sm:self-auto rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black px-4 py-2 text-xs font-bold transition-all shadow-md cursor-pointer shrink-0"
-                    >
-                      Voir uniquement les Inédites ({unreleasedTracks.length})
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenLicenses('unreleased')}
+                        className="rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 px-3.5 py-2 text-xs font-bold transition-all cursor-pointer shrink-0"
+                      >
+                        📄 Droits Inédite ($2.49)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedTag('unreleased')}
+                        className="self-start sm:self-auto rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black px-4 py-2 text-xs font-bold transition-all shadow-md cursor-pointer shrink-0"
+                      >
+                        Voir uniquement les Inédites ({unreleasedTracks.length})
+                      </button>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -490,6 +509,7 @@ export default function App() {
                         onTogglePlay={handleTogglePlay}
                         onToggleLike={handleToggleLike}
                         onBuy={(t) => setSelectedTrackForBuy(t)}
+                        onOpenLicenses={handleOpenLicenses}
                       />
                     ))}
                   </div>
@@ -516,13 +536,22 @@ export default function App() {
                         </p>
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedTag('released')}
-                      className="self-start sm:self-auto rounded-xl bg-rose-500 hover:bg-rose-400 text-white px-4 py-2 text-xs font-bold transition-all shadow-md cursor-pointer shrink-0"
-                    >
-                      Voir uniquement les Released ({releasedTracks.length})
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenLicenses('released')}
+                        className="rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 px-3.5 py-2 text-xs font-bold transition-all cursor-pointer shrink-0"
+                      >
+                        📄 Droits Released ($0.99)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedTag('released')}
+                        className="self-start sm:self-auto rounded-xl bg-rose-500 hover:bg-rose-400 text-white px-4 py-2 text-xs font-bold transition-all shadow-md cursor-pointer shrink-0"
+                      >
+                        Voir uniquement les Released ({releasedTracks.length})
+                      </button>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -537,6 +566,7 @@ export default function App() {
                         onTogglePlay={handleTogglePlay}
                         onToggleLike={handleToggleLike}
                         onBuy={(t) => setSelectedTrackForBuy(t)}
+                        onOpenLicenses={handleOpenLicenses}
                       />
                     ))}
                   </div>
@@ -555,6 +585,7 @@ export default function App() {
                     onTogglePlay={handleTogglePlay}
                     onToggleLike={handleToggleLike}
                     onBuy={(t) => setSelectedTrackForBuy(t)}
+                    onOpenLicenses={handleOpenLicenses}
                   />
                 ))}
               </div>
@@ -572,6 +603,7 @@ export default function App() {
           setIsOrdersModalOpen(true);
         }}
         onOpenContact={() => setIsContactModalOpen(true)}
+        onOpenLicenses={() => handleOpenLicenses('released')}
         config={paymentConfig}
       />
 
@@ -611,6 +643,7 @@ export default function App() {
             setSelectedTrackForBuy(null);
             handleViewOrder(orderId);
           }}
+          onOpenLicenses={handleOpenLicenses}
         />
       )}
 
@@ -634,6 +667,13 @@ export default function App() {
         isOpen={isContactModalOpen}
         onClose={() => setIsContactModalOpen(false)}
         config={paymentConfig}
+      />
+
+      {/* Official 2 Licenses Terms & Comparative Rights Modal */}
+      <LicenseModal
+        isOpen={isLicenseModalOpen}
+        onClose={() => setIsLicenseModalOpen(false)}
+        initialTab={licenseModalTab}
       />
     </div>
   );

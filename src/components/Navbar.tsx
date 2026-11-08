@@ -8,6 +8,7 @@ interface NavbarProps {
   onOpenOrders: () => void;
   onOpenGuide: () => void;
   onOpenContact?: () => void;
+  onOpenLicenses?: () => void;
   orders: Order[];
 }
 
@@ -17,6 +18,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenOrders,
   onOpenGuide,
   onOpenContact,
+  onOpenLicenses,
   orders,
 }) => {
   const pendingCount = orders.filter((o) => o.status === 'pending').length;
@@ -66,6 +68,20 @@ export const Navbar: React.FC<NavbarProps> = ({
             <ShoppingBag className="h-4 w-4" />
             <span>Store</span>
           </button>
+
+          {/* Licenses Terms button */}
+          {onOpenLicenses && (
+            <button
+              id="nav-licenses-btn"
+              onClick={onOpenLicenses}
+              className="flex items-center gap-1.5 rounded-lg px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-semibold text-neutral-300 hover:text-amber-400 hover:bg-neutral-800/50 border border-neutral-800 transition-all cursor-pointer"
+              title="Voir les 2 types de licence ($0.99 vs $2.49)"
+            >
+              <FileCode className="h-4 w-4 text-amber-400" />
+              <span>Licences</span>
+              <span className="hidden sm:inline text-[10px] text-amber-400 font-mono font-bold">($0.99 vs $2.49)</span>
+            </button>
+          )}
 
           {/* Contact & Studio button */}
           {onOpenContact && (

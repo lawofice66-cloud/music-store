@@ -134,6 +134,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [orderFilter, setOrderFilter] = useState<'all' | 'pending' | 'confirmed'>('all');
   const [orderSearch, setOrderSearch] = useState('');
 
+  // Admin Tracks Filter & Search
+  const [adminTrackFilter, setAdminTrackFilter] = useState<'all' | 'unreleased' | 'released'>('all');
+  const [adminTrackSearch, setAdminTrackSearch] = useState('');
+
   // Authentication logic via secure backend API + client-side fallback
   const performLogin = async (pw: string) => {
     setAuthError('');
@@ -175,6 +179,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     setTrackForm({
       title: '',
       description: '',
+      status: 'released',
+      category: 'released',
       price: 0.99,
       mp3Price: 0.99,
       wavPrice: 2.49,
@@ -195,10 +201,45 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   const handleOpenEditTrack = (track: Track) => {
     setEditingTrackId(track.id);
-    setTrackForm({ ...track });
+    const numPrice = Number(track.price) || 0.99;
+    const computedStatus: 'released' | 'unreleased' =
+      (track.status || '').toLowerCase() === 'unreleased' || numPrice >= 2.49
+        ? 'unreleased'
+        : 'released';
+    setTrackForm({
+      ...track,
+      price: numPrice,
+      status: computedStatus,
+      category: track.category || computedStatus,
+      mp3Price: track.mp3Price !== undefined ? Number(track.mp3Price) : (computedStatus === 'unreleased' ? 2.49 : 0.99),
+      wavPrice: track.wavPrice !== undefined ? Number(track.wavPrice) : 2.49,
+    });
     setAudioStorageType(track.audioPreviewUrl?.startsWith('/api/media/') ? 'r2' : null);
     setUploadError(null);
     setIsEditingTrack(true);
+  };
+
+  // 1-Click Quick Switch between Inédite ($2.49) and Released ($0.99)
+  const handleQuickSwitchCase = async (track: Track, targetCase: 'released' | 'unreleased') => {
+    const newPrice = targetCase === 'unreleased' ? 2.49 : 0.99;
+    const updatedTrack: Track = {
+      ...track,
+      status: targetCase,
+      category: targetCase,
+      price: newPrice,
+      mp3Price: targetCase === 'unreleased' ? 2.49 : 0.99,
+      wavPrice: 2.49,
+    };
+
+    const result = await apiSaveTrack(updatedTrack, true);
+    const finalTrack = result.success && result.track ? result.track : updatedTrack;
+    const updatedList = tracks.map((t) => (t.id === track.id ? finalTrack : t));
+    onUpdateTracks(updatedList);
+    triggerSuccessMessage(
+      targetCase === 'unreleased'
+        ? `✓ "${track.title}" a rejoint la case INÉDITE ($2.49 USD) !`
+        : `✓ "${track.title}" a rejoint la case RELEASED ($0.99 USD) !`
+    );
   };
 
   const handleDeleteTrack = async (id: string) => {
@@ -218,12 +259,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     }
 
     const isEdit = !!editingTrackId;
+    const numPrice = trackForm.price !== undefined ? Number(trackForm.price) : 0.99;
+    // Règle automatique stricte de classification :
+    // Si prix >= 2.49 USD -> Inédite (Unreleased)
+    // Si prix < 2.49 USD (ex: 0.99 USD) -> Sorti (Released)
+    const targetStatus: 'released' | 'unreleased' =
+      trackForm.status === 'unreleased' || numPrice >= 2.49 ? 'unreleased' : 'released';
+    const targetCategory = trackForm.category || targetStatus;
+
     const trackToSave: Track = {
       id: editingTrackId || `track-${Date.now()}`,
       title: trackForm.title || 'New Beat',
       description: trackForm.description || '',
-      price: trackForm.price !== undefined ? Number(trackForm.price) : 0.99,
-      mp3Price: trackForm.mp3Price !== undefined ? Number(trackForm.mp3Price) : (trackForm.price !== undefined ? Number(trackForm.price) : 0.99),
+      status: targetStatus,
+      category: targetCategory,
+      price: numPrice,
+      mp3Price: targetStatus === 'unreleased' ? numPrice : (trackForm.mp3Price !== undefined ? Number(trackForm.mp3Price) : 0.99),
       wavPrice: trackForm.wavPrice !== undefined ? Number(trackForm.wavPrice) : 2.49,
       currency: trackForm.currency || '$',
       bpm: Number(trackForm.bpm) || 140,
@@ -245,10 +296,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     if (isEdit) {
       const updated = tracks.map((t) => (t.id === editingTrackId ? finalTrack : t));
       onUpdateTracks(updated);
-      triggerSuccessMessage(`✓ Track "${finalTrack.title}" updated and saved permanently!`);
+      triggerSuccessMessage(`✓ Morceau "${finalTrack.title}" enregistré dans la case ${finalTrack.status === 'unreleased' ? 'INÉDITE ($2.49)' : 'RELEASED ($0.99)'} !`);
     } else {
       onUpdateTracks([finalTrack, ...tracks]);
-      triggerSuccessMessage(`✓ New track "${finalTrack.title}" added and saved permanently in D1 database!`);
+      triggerSuccessMessage(`✓ Nouveau morceau "${finalTrack.title}" ajouté dans la case ${finalTrack.status === 'unreleased' ? 'INÉDITE ($2.49)' : 'RELEASED ($0.99)'} !`);
     }
 
     setIsEditingTrack(false);
@@ -623,6 +674,114 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
 
                 <form onSubmit={handleSaveTrackForm} className="space-y-4">
+                  {/* Dynamic Case Indicator Banner */}
+                  <div
+                    className={`p-3.5 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs transition-all ${
+                      (trackForm.status || '').toLowerCase() === 'unreleased' || Number(trackForm.price) >= 2.49
+                        ? 'bg-gradient-to-r from-emerald-950/70 to-emerald-900/30 border-emerald-500/50 text-emerald-200'
+                        : 'bg-gradient-to-r from-rose-950/70 to-rose-900/30 border-rose-500/50 text-rose-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-black/40 text-xl border border-white/10">
+                        {(trackForm.status || '').toLowerCase() === 'unreleased' || Number(trackForm.price) >= 2.49 ? '🟢' : '🔴'}
+                      </span>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-extrabold uppercase tracking-wide text-white text-sm">
+                            {(trackForm.status || '').toLowerCase() === 'unreleased' || Number(trackForm.price) >= 2.49
+                              ? 'CASE ATTRIBUÉE : MORCEAU INÉDIT (UNRELEASED)'
+                              : 'CASE ATTRIBUÉE : CATALOGUE RELEASED (SORTI)'}
+                          </span>
+                          <span className="rounded-full bg-black/50 font-mono text-xs px-2.5 py-0.5 font-black border border-white/20 text-amber-300">
+                            ${(trackForm.price ?? 0.99).toFixed(2)} USD
+                          </span>
+                        </div>
+                        <p className="text-[11px] opacity-85 mt-0.5 leading-snug">
+                          {(trackForm.status || '').toLowerCase() === 'unreleased' || Number(trackForm.price) >= 2.49
+                            ? '✓ Licence Exclusive Master $2.49 USD • TOUT EST AUTORISÉ (Distribution streaming, Sync film/TV, Master WAV 24-Bit)'
+                            : '✓ Licence MP3 Standard $0.99 USD • Distribution streaming & Sync INTERDITS (Réseaux, DJ, Événements autorisés)'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 self-start sm:self-auto shrink-0">
+                      <span className="text-[10px] font-mono uppercase px-2.5 py-1 rounded-lg bg-black/50 border border-white/20 font-bold text-neutral-300">
+                        ⚡ Case Auto-Sync
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Manual Case / Category Quick Selection */}
+                  <div>
+                    <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
+                      Case du morceau (Modifier ici ajuste automatiquement le prix à $0.99 ou $2.49)
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTrackForm({
+                            ...trackForm,
+                            status: 'released',
+                            category: 'released',
+                            price: 0.99,
+                            mp3Price: 0.99,
+                            wavPrice: 2.49,
+                          });
+                        }}
+                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                          (trackForm.status || '').toLowerCase() !== 'unreleased' && Number(trackForm.price) < 2.49
+                            ? 'bg-rose-500/20 border-rose-400 text-rose-200 ring-2 ring-rose-400/40 shadow-lg'
+                            : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-extrabold text-xs flex items-center gap-1.5 text-white">
+                            <span>🔴</span> Case Released ($0.99 USD)
+                          </span>
+                          <span className="text-[10px] font-mono font-bold text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded">
+                            0.99 USD
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-neutral-400">
+                          Morceau paru sur plateformes. Distribution & Sync <strong>INTERDITS</strong>.
+                        </p>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTrackForm({
+                            ...trackForm,
+                            status: 'unreleased',
+                            category: 'unreleased',
+                            price: 2.49,
+                            mp3Price: 2.49,
+                            wavPrice: 2.49,
+                          });
+                        }}
+                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                          (trackForm.status || '').toLowerCase() === 'unreleased' || Number(trackForm.price) >= 2.49
+                            ? 'bg-emerald-500/20 border-emerald-400 text-emerald-200 ring-2 ring-emerald-400/40 shadow-lg'
+                            : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-extrabold text-xs flex items-center gap-1.5 text-white">
+                            <span>🟢</span> Case Inédite / Unreleased ($2.49 USD)
+                          </span>
+                          <span className="text-[10px] font-mono font-bold text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded">
+                            2.49 USD
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-neutral-400">
+                          Morceau exclusif non paru. <strong>TOUT EST AUTORISÉ</strong> (Sync, Streaming, WAV).
+                        </p>
+                      </button>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-semibold text-neutral-300 mb-1">
@@ -641,7 +800,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                       <div>
                         <label className="block text-xs font-semibold text-neutral-300 mb-1">
-                          MP3 Price <span className="text-amber-400">*</span>
+                          Prix ($ USD) <span className="text-amber-400">*</span>
                         </label>
                         <input
                           type="number"
@@ -650,11 +809,29 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           min="0.1"
                           value={trackForm.price ?? 0.99}
                           onChange={(e) => {
-                            const val = parseFloat(e.target.value);
-                            setTrackForm({ ...trackForm, price: val, mp3Price: val });
+                            const raw = e.target.value;
+                            const val = parseFloat(raw);
+                            if (isNaN(val)) {
+                              setTrackForm({ ...trackForm, price: 0 });
+                              return;
+                            }
+                            // Règle automatique stricte de l'utilisateur :
+                            // À chaque fois qu'un prix est mis, le morceau rejoint sa case correspondante !
+                            const autoStatus: 'released' | 'unreleased' = val >= 2.49 ? 'unreleased' : 'released';
+                            setTrackForm({
+                              ...trackForm,
+                              price: val,
+                              mp3Price: val,
+                              status: autoStatus,
+                              category: autoStatus,
+                              wavPrice: val >= 2.49 ? val : (trackForm.wavPrice || 2.49),
+                            });
                           }}
-                          className="w-full rounded-xl border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-white focus:border-amber-400 focus:outline-none"
+                          className="w-full rounded-xl border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-white focus:border-amber-400 focus:outline-none font-mono font-bold"
                         />
+                        <span className="text-[10px] text-neutral-400 block mt-0.5">
+                          {Number(trackForm.price) >= 2.49 ? '→ Case Inédite' : '→ Case Released'}
+                        </span>
                       </div>
                       <div>
                         <label className="block text-xs font-semibold text-neutral-300 mb-1">
@@ -973,62 +1150,180 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               </div>
             )}
 
+            {/* Track Filter Tabs & Search Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#0a0b12] p-4 rounded-2xl border border-neutral-800">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setAdminTrackFilter('all')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    adminTrackFilter === 'all'
+                      ? 'bg-amber-500 text-black shadow-md'
+                      : 'bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800'
+                  }`}
+                >
+                  Toutes les pistes ({tracks.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAdminTrackFilter('unreleased')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                    adminTrackFilter === 'unreleased'
+                      ? 'bg-emerald-500 text-black shadow-md'
+                      : 'bg-neutral-900 text-emerald-400 hover:bg-neutral-800 border border-emerald-500/30'
+                  }`}
+                >
+                  <span>🟢</span>
+                  <span>Case Inédites ($2.49) ({tracks.filter((t) => (t.status || '').toLowerCase() === 'unreleased' || Number(t.price) >= 2.49).length})</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAdminTrackFilter('released')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                    adminTrackFilter === 'released'
+                      ? 'bg-rose-500 text-white shadow-md'
+                      : 'bg-neutral-900 text-rose-400 hover:bg-neutral-800 border border-rose-500/30'
+                  }`}
+                >
+                  <span>🔴</span>
+                  <span>Case Released ($0.99) ({tracks.filter((t) => (t.status || '').toLowerCase() !== 'unreleased' && Number(t.price) < 2.49).length})</span>
+                </button>
+              </div>
+
+              <div className="w-full sm:w-64">
+                <input
+                  type="text"
+                  placeholder="Rechercher une piste..."
+                  value={adminTrackSearch}
+                  onChange={(e) => setAdminTrackSearch(e.target.value)}
+                  className="w-full rounded-xl border border-neutral-700 bg-neutral-900 px-3 py-1.5 text-xs text-white placeholder-neutral-500 focus:border-amber-400 focus:outline-none"
+                />
+              </div>
+            </div>
+
             {/* List of existing tracks in admin */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {tracks.map((track) => (
-                <div
-                  key={track.id}
-                  className="flex flex-col justify-between rounded-2xl border border-neutral-800 bg-[#0f111a] p-4 hover:border-neutral-700 transition-all"
-                >
-                  <div className="flex gap-3">
-                    <img
-                      src={track.coverImage}
-                      alt={track.title}
-                      className="h-16 w-16 rounded-xl object-cover border border-neutral-700 shrink-0"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-bold text-white truncate text-sm">
-                          {track.title}
-                        </h4>
-                        <span className="font-mono font-bold text-amber-400 text-sm">
-                          {track.price} {track.currency}
-                        </span>
+              {tracks
+                .filter((track) => {
+                  const isUnreleased = (track.status || '').toLowerCase() === 'unreleased' || Number(track.price) >= 2.49;
+                  if (adminTrackFilter === 'unreleased' && !isUnreleased) return false;
+                  if (adminTrackFilter === 'released' && isUnreleased) return false;
+                  if (adminTrackSearch.trim()) {
+                    const q = adminTrackSearch.toLowerCase().trim();
+                    return (
+                      track.title.toLowerCase().includes(q) ||
+                      (track.description || '').toLowerCase().includes(q) ||
+                      (track.tags || []).some((tag) => tag.toLowerCase().includes(q))
+                    );
+                  }
+                  return true;
+                })
+                .map((track) => {
+                  const isUnreleased = (track.status || '').toLowerCase() === 'unreleased' || Number(track.price) >= 2.49;
+                  return (
+                    <div
+                      key={track.id}
+                      className={`flex flex-col justify-between rounded-2xl border p-4 transition-all ${
+                        isUnreleased
+                          ? 'border-emerald-500/30 bg-[#0c1318] hover:border-emerald-500/60'
+                          : 'border-rose-500/20 bg-[#120f14] hover:border-rose-500/50'
+                      }`}
+                    >
+                      <div>
+                        {/* Case Badge Header */}
+                        <div className="flex items-center justify-between gap-2 mb-2.5 pb-2 border-b border-white/5">
+                          <span
+                            className={`inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border ${
+                              isUnreleased
+                                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                                : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                            }`}
+                          >
+                            <span>{isUnreleased ? '🟢' : '🔴'}</span>
+                            <span>{isUnreleased ? 'INÉDITE (UNRELEASED)' : 'CATALOGUE RELEASED'}</span>
+                          </span>
+
+                          <span className="font-mono font-black text-amber-300 text-sm">
+                            ${(Number(track.price) || 0.99).toFixed(2)} {track.currency || '$'}
+                          </span>
+                        </div>
+
+                        <div className="flex gap-3">
+                          <img
+                            src={track.coverImage}
+                            alt={track.title}
+                            className="h-16 w-16 rounded-xl object-cover border border-neutral-700 shrink-0"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <h4 className="font-bold text-white truncate text-sm">
+                              {track.title}
+                            </h4>
+                            <p className="text-xs text-neutral-400 mt-1 line-clamp-1">
+                              {track.bpm} BPM • {track.key}
+                            </p>
+                            <p className="text-[11px] text-neutral-500 line-clamp-2 mt-1">
+                              {track.description || (isUnreleased ? 'Morceau studio inédit ($2.49 USD tout autorisé)' : 'Morceau Released ($0.99 USD mp3 standard)')}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                      <p className="text-xs text-neutral-400 mt-1 line-clamp-1">
-                        {track.bpm} BPM • {track.key}
-                      </p>
-                      <p className="text-[11px] text-neutral-500 line-clamp-2 mt-1">
-                        {track.description}
-                      </p>
+
+                      <div className="mt-4 flex flex-col gap-2 border-t border-neutral-800/80 pt-3">
+                        <div className="flex items-center justify-between text-[10px] text-neutral-500">
+                          <span className="font-mono truncate max-w-[140px]">ID: {track.id}</span>
+                          <span className="text-neutral-400">
+                            {isUnreleased ? 'Master WAV' : `MP3 $${track.mp3Price || 0.99} / WAV $${track.wavPrice || 2.49}`}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between gap-1.5 pt-1">
+                          {/* Quick Switch Button */}
+                          {isUnreleased ? (
+                            <button
+                              type="button"
+                              onClick={() => handleQuickSwitchCase(track, 'released')}
+                              title="Déplacer vers la case Released ($0.99 USD)"
+                              className="flex items-center gap-1 rounded-lg border border-rose-500/40 bg-rose-500/10 px-2 py-1 text-[11px] font-bold text-rose-300 hover:bg-rose-500/25 transition-all cursor-pointer"
+                            >
+                              <span>🔴</span>
+                              <span>Passer à $0.99</span>
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleQuickSwitchCase(track, 'unreleased')}
+                              title="Déplacer vers la case Inédite ($2.49 USD)"
+                              className="flex items-center gap-1 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-2 py-1 text-[11px] font-bold text-emerald-300 hover:bg-emerald-500/25 transition-all cursor-pointer"
+                            >
+                              <span>🟢</span>
+                              <span>Passer à $2.49</span>
+                            </button>
+                          )}
+
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditTrack(track)}
+                              className="flex items-center gap-1 rounded-lg border border-neutral-700 bg-neutral-800 px-2.5 py-1 text-xs font-semibold text-neutral-300 hover:text-white hover:bg-neutral-700 transition-all cursor-pointer"
+                            >
+                              <Edit2 className="h-3 w-3" />
+                              <span>Edit</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteTrack(track.id)}
+                              className="flex items-center gap-1 rounded-lg border border-red-500/30 bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-400 hover:bg-red-500/20 transition-all cursor-pointer"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                              <span>Delete</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="mt-4 flex items-center justify-between border-t border-neutral-800/80 pt-3">
-                    <span className="text-[10px] font-mono text-neutral-500">
-                      ID: {track.id}
-                    </span>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleOpenEditTrack(track)}
-                        className="flex items-center gap-1 rounded-lg border border-neutral-700 bg-neutral-800 px-2.5 py-1 text-xs font-semibold text-neutral-300 hover:text-white hover:bg-neutral-700"
-                      >
-                        <Edit2 className="h-3 w-3" />
-                        <span>Edit</span>
-                      </button>
-
-                      <button
-                        onClick={() => handleDeleteTrack(track.id)}
-                        className="flex items-center gap-1 rounded-lg border border-red-500/30 bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-400 hover:bg-red-500/20"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                        <span>Delete</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                  );
+                })}
             </div>
           </div>
         )}

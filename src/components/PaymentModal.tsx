@@ -13,7 +13,8 @@ import {
   Info,
   Clock,
   Download,
-  ArrowLeft
+  ArrowLeft,
+  Ban,
 } from 'lucide-react';
 import { Track, PaymentConfig, Order } from '../types';
 import { generateWalletQrSvg } from '../utils/qrCode';
@@ -33,6 +34,7 @@ interface PaymentModalProps {
     licenseType?: string;
   }) => Order;
   onViewOrder: (orderId: string) => void;
+  onOpenLicenses?: (status?: 'released' | 'unreleased') => void;
 }
 
 type TabType = 'nowpayments' | 'crypto' | 'other';
@@ -46,6 +48,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   onClose,
   onSubmitOrder,
   onViewOrder,
+  onOpenLicenses,
 }) => {
   const isUnreleased = track.status === 'unreleased';
   const [selectedFormat, setSelectedFormat] = useState<'mp3' | 'wav'>(isUnreleased ? 'wav' : 'mp3');
@@ -295,7 +298,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
           /* PAYMENT SELECTION & PROOF FORM */
           <div className="p-5 sm:p-6 space-y-6">
             {/* Step 1: License Format Choice */}
-            <div className="space-y-2">
+            <div className="space-y-3">
               {isUnreleased ? (
                 <>
                   <div className="flex items-center justify-between">
@@ -323,6 +326,28 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                       <div className="text-xl font-black font-mono text-emerald-300">$2.49</div>
                       <div className="text-[10px] text-neutral-400 font-mono">~2.49 USDT</div>
                     </div>
+                  </div>
+
+                  {/* Permissions Banner Unreleased */}
+                  <div className="rounded-xl border border-emerald-500/40 bg-emerald-950/30 p-3 text-xs space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-extrabold text-emerald-300 flex items-center gap-1.5 text-xs">
+                        <Check className="h-4 w-4 text-emerald-400 shrink-0" />
+                        <span>TOUT EST 100% AUTORISÉ pour ce morceau Inédit ($2.49)</span>
+                      </span>
+                      {onOpenLicenses && (
+                        <button
+                          type="button"
+                          onClick={() => onOpenLicenses('unreleased')}
+                          className="text-amber-400 hover:text-amber-300 underline font-bold text-[11px] cursor-pointer"
+                        >
+                          📄 Voir le contrat complet
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-neutral-300 text-[11px] leading-relaxed">
+                      ✅ Distribution streaming autorisée (Spotify, Apple Music, Deezer, etc.) • ✅ Synchronisation complète (Films, Séries, TV, Pubs) • ✅ Utilisation commerciale illimitée.
+                    </p>
                   </div>
                 </>
               ) : (
@@ -392,6 +417,30 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         <div className="text-[10px] text-neutral-400 font-mono">~2.49 USDT</div>
                       </div>
                     </button>
+                  </div>
+
+                  {/* Permissions Banner Released ($0.99) */}
+                  <div className="rounded-xl border border-rose-500/40 bg-rose-950/25 p-3 text-xs space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-extrabold text-rose-300 flex items-center gap-1.5 text-xs">
+                        <Ban className="h-4 w-4 text-rose-400 shrink-0" />
+                        <span>Licence Released ($0.99 USD) : Restrictions Importantes</span>
+                      </span>
+                      {onOpenLicenses && (
+                        <button
+                          type="button"
+                          onClick={() => onOpenLicenses('released')}
+                          className="text-amber-400 hover:text-amber-300 underline font-bold text-[11px] cursor-pointer"
+                        >
+                          📄 Comparer les 2 licences
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-neutral-300 text-[11px] leading-relaxed">
+                      <strong className="text-rose-400">❌ INTERDIT :</strong> Distribution sur plateformes de streaming (Spotify, Apple Music, Deezer...) et synchronisation TV/Cinéma.
+                      <br />
+                      <strong className="text-emerald-300">✅ AUTORISÉ :</strong> Réseaux sociaux (TikTok, YouTube, Instagram Reels), podcasts, soirées privées, DJ sets et événements.
+                    </p>
                   </div>
                 </>
               )}

@@ -24,6 +24,7 @@ interface FooterProps {
   onOpenAdmin: () => void;
   onOpenOrders: () => void;
   onOpenContact?: () => void;
+  onOpenLicenses?: () => void;
   config?: PaymentConfig;
 }
 
@@ -32,6 +33,7 @@ export const Footer: React.FC<FooterProps> = ({
   onOpenAdmin,
   onOpenOrders,
   onOpenContact,
+  onOpenLicenses,
   config,
 }) => {
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -231,6 +233,16 @@ export const Footer: React.FC<FooterProps> = ({
                   Track Order & Master Downloads
                 </button>
               </li>
+              {onOpenLicenses && (
+                <li>
+                  <button
+                    onClick={onOpenLicenses}
+                    className="hover:text-amber-400 transition-colors cursor-pointer text-left flex items-center gap-1 text-amber-300 font-bold"
+                  >
+                    📄 Conditions des 2 Licences ($0.99 vs $2.49)
+                  </button>
+                </li>
+              )}
               <li>
                 <button
                   onClick={onOpenGuide}

@@ -11,6 +11,7 @@ interface TrackCardProps {
   onTogglePlay: (track: Track) => void;
   onToggleLike?: (track: Track) => void;
   onBuy: (track: Track) => void;
+  onOpenLicenses?: (status?: 'released' | 'unreleased') => void;
 }
 
 export const TrackCard: React.FC<TrackCardProps> = ({
@@ -22,6 +23,7 @@ export const TrackCard: React.FC<TrackCardProps> = ({
   onTogglePlay,
   onToggleLike,
   onBuy,
+  onOpenLicenses,
 }) => {
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
@@ -241,6 +243,39 @@ export const TrackCard: React.FC<TrackCardProps> = ({
               <ShoppingCart className="h-4 w-4 fill-black/30" />
               <span>Buy Now ($0.99)</span>
             </button>
+          )}
+        </div>
+
+        {/* Quick License Terms Banner */}
+        <div className="flex items-center justify-between text-[10px] pt-1.5 border-t border-neutral-800/60 font-mono">
+          {track.status === 'unreleased' ? (
+            <>
+              <span className="text-emerald-400 font-bold">✅ Tout est autorisé ($2.49)</span>
+              {onOpenLicenses && (
+                <button
+                  type="button"
+                  onClick={() => onOpenLicenses('unreleased')}
+                  className="text-neutral-400 hover:text-amber-400 underline cursor-pointer"
+                >
+                  📄 Voir licence
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              <span className="text-neutral-400">
+                <span className="text-rose-400 font-bold">❌ Pas de streaming / sync</span> • Autre OK
+              </span>
+              {onOpenLicenses && (
+                <button
+                  type="button"
+                  onClick={() => onOpenLicenses('released')}
+                  className="text-neutral-400 hover:text-amber-400 underline cursor-pointer"
+                >
+                  📄 Voir licence
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>

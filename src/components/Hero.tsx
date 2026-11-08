@@ -14,6 +14,7 @@ import {
   Twitter,
   Send,
   Music,
+  FileCode,
 } from 'lucide-react';
 
 interface HeroProps {
@@ -31,6 +32,7 @@ interface HeroProps {
   englishCount?: number;
   likedCount?: number;
   onOpenContact?: () => void;
+  onOpenLicenses?: () => void;
 }
 
 export const Hero: React.FC<HeroProps> = ({
@@ -48,6 +50,7 @@ export const Hero: React.FC<HeroProps> = ({
   englishCount = 59,
   likedCount = 0,
   onOpenContact,
+  onOpenLicenses,
 }) => {
   return (
     <section className="relative overflow-hidden border-b border-neutral-800/60 bg-gradient-to-b from-[#0e1017] via-[#090a0f] to-[#090a0f] pt-10 pb-8 px-4 sm:px-6">
@@ -69,7 +72,19 @@ export const Hero: React.FC<HeroProps> = ({
           </div>
 
           {/* Social Media & Contact Quick Links */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {onOpenLicenses && (
+              <button
+                id="hero-licenses-btn"
+                onClick={onOpenLicenses}
+                className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500/20 to-amber-600/10 hover:from-amber-500/30 hover:to-amber-600/20 px-3.5 py-1 text-xs font-bold text-amber-300 border border-amber-500/40 transition-all hover:scale-105 cursor-pointer shadow-sm"
+                title="Consulter les 2 types de licence ($0.99 vs $2.49)"
+              >
+                <FileCode className="h-3.5 w-3.5 text-amber-400" />
+                <span>📄 Voir les 2 Licences ($0.99 vs $2.49)</span>
+              </button>
+            )}
+
             {onOpenContact && (
               <button
                 onClick={onOpenContact}
