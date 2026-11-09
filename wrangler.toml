@@ -22,11 +22,8 @@ bucket_name = "music-2026"
 
 # Cloudflare KV Storage (Persistent Play & Like Counters)
 # Note: Pour activer KV, créez le namespace dans Cloudflare Dashboard (Storage & Databases > KV)
-# ou exécutez 'npx wrangler kv namespace create FALLEN75_KV', puis insérez l'ID hexadécimal à 32 caractères ci-dessous.
-# En attendant, Cloudflare D1 (fallen75-db) assure la persistance complète des écoutes et des likes.
-# [[kv_namespaces]]
-# binding = "KV"
-# id = "VOTRE_KV_ID_HEXADECIMAL_32_CARACTERES"
+# nommé FALLEN75_KV, ou supprimez le binding dans Settings > Bindings si vous utilisez D1.
+kv_namespaces = []
 
 [vars]
 CF_R2_PUBLIC_URL = "https://pub-32ecd1e71ab848fdacff0b89e5c8bb4e.r2.dev"
