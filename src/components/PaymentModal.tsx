@@ -59,13 +59,11 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [copiedMessage, setCopiedMessage] = useState<string | null>(null);
 
-  const currentPrice = isUnreleased
-    ? 2.49
-    : (selectedFormat === 'wav' ? (track.wavPrice || 2.49) : (track.mp3Price || track.price || 0.99));
+  const currentPrice = isUnreleased ? 2.49 : 0.99;
   const currentCurrency = track.currency === '€' ? '$' : (track.currency || '$');
   const licenseLabel = isUnreleased
-    ? 'Inédite Studio Master ($2.49)'
-    : (selectedFormat === 'wav' ? 'WAV Studio Master ($2.49)' : 'MP3 License ($0.99)');
+    ? 'Inédite WAV Master ($2.49) • Full Sync & Streaming'
+    : 'MP3 Social Monetization ($0.99) • Sync & Dist. Interdits';
 
   // Form states
   const [clientEmail, setClientEmail] = useState('');
@@ -355,68 +353,28 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-bold uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
                       <Sparkles className="h-3.5 w-3.5 text-rose-400" />
-                      <span>Step 1: Choose License Format (Released Track)</span>
+                      <span>Étape 1 : Licence Morceau Sorti (Released)</span>
                     </label>
                     <span className="text-[11px] font-mono text-neutral-400">
-                      Selected: <span className="font-bold text-white">{selectedFormat.toUpperCase()} (${currentPrice.toFixed(2)})</span>
+                      Tarif Unique Released : <span className="font-bold text-amber-400 font-mono">$0.99 USD</span>
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {/* MP3 Option */}
-                    <button
-                      type="button"
-                      id="select-format-mp3"
-                      onClick={() => setSelectedFormat('mp3')}
-                      className={`flex items-start justify-between p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
-                        selectedFormat === 'mp3'
-                          ? 'border-amber-400 bg-amber-500/15 ring-2 ring-amber-400/40 shadow-lg shadow-amber-500/10'
-                          : 'border-neutral-800 bg-[#0d0f17] hover:border-neutral-700 hover:bg-neutral-900'
-                      }`}
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-black text-white">MP3 License</span>
-                          <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-mono font-bold text-amber-400 border border-amber-500/30">
-                            320 kbps
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-neutral-400 leading-snug">
-                          High-quality MP3 for streaming, YouTube & mixtapes
-                        </p>
+                  <div className="p-4 rounded-xl border border-amber-500/50 bg-gradient-to-r from-amber-950/40 to-amber-900/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg shadow-amber-950/20">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-black text-white">🟢 Licence MP3 : Social Monetization</span>
+                        <span className="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-mono font-bold text-amber-400 border border-amber-500/40">
+                          HQ 320 kbps MP3
+                        </span>
                       </div>
-                      <div className="text-right shrink-0 ml-3">
-                        <div className="text-lg font-black font-mono text-amber-400">$0.99</div>
-                        <div className="text-[10px] text-neutral-400 font-mono">~0.99 USDT</div>
-                      </div>
-                    </button>
-
-                    {/* WAV Option */}
-                    <button
-                      type="button"
-                      id="select-format-wav"
-                      onClick={() => setSelectedFormat('wav')}
-                      className={`flex items-start justify-between p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
-                        selectedFormat === 'wav'
-                          ? 'border-cyan-400 bg-cyan-500/15 ring-2 ring-cyan-400/40 shadow-lg shadow-cyan-500/10'
-                          : 'border-neutral-800 bg-[#0d0f17] hover:border-neutral-700 hover:bg-neutral-900'
-                      }`}
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-black text-white">WAV Studio Master</span>
-                          <span className="rounded bg-cyan-500/20 px-1.5 py-0.5 text-[10px] font-mono font-bold text-cyan-400 border border-cyan-500/30">
-                            24-bit Lossless
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-neutral-400 leading-snug">
-                          Uncompressed studio master for radio & professional mastering
-                        </p>
-                      </div>
-                      <div className="text-right shrink-0 ml-3">
-                        <div className="text-lg font-black font-mono text-cyan-400">$2.49</div>
-                        <div className="text-[10px] text-neutral-400 font-mono">~2.49 USDT</div>
-                      </div>
-                    </button>
+                      <p className="text-[11px] text-amber-200/80 leading-snug">
+                        Morceau déjà sorti. Monétisation 100% autorisée sur TikTok, YouTube, DJ sets et usage personnel.
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className="text-xl font-black font-mono text-amber-400">$0.99</div>
+                      <div className="text-[10px] text-neutral-400 font-mono">~0.99 USDT</div>
+                    </div>
                   </div>
 
                   {/* Permissions Banner Released ($0.99) */}
@@ -438,8 +396,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     </div>
                     <p className="text-neutral-300 text-[11px] leading-relaxed">
                       <strong className="text-rose-400">❌ INTERDIT :</strong> Distribution sur plateformes de streaming (Spotify, Apple Music, Deezer...) et synchronisation TV/Cinéma.
-                      <br />
-                      <strong className="text-emerald-300">✅ AUTORISÉ :</strong> Réseaux sociaux (TikTok, YouTube, Instagram Reels), podcasts, soirées privées, DJ sets et événements.
+                    </p>
+                    <p className="text-emerald-400 text-[11px] leading-relaxed">
+                      <strong>✅ AUTORISÉ :</strong> TikTok, YouTube, Facebook, DJ sets, clubs, fêtes, et projets personnels non-sync.
                     </p>
                   </div>
                 </>

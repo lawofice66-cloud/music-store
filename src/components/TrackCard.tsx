@@ -200,11 +200,11 @@ export const TrackCard: React.FC<TrackCardProps> = ({
           {track.status === 'unreleased' ? (
             <div>
               <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 block mb-0.5">
-                🟢 Morceau Inédit (Unreleased)
+                🟢 Inédite • WAV Master
               </span>
               <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="inline-flex items-center text-xs sm:text-sm font-extrabold font-mono text-emerald-300 bg-emerald-500/15 px-2.5 py-0.5 rounded-lg border border-emerald-500/40">
-                  Inédite Master $2.49 USD
+                  👑 Inédite Master $2.49 USD
                 </span>
               </div>
             </div>
@@ -214,12 +214,8 @@ export const TrackCard: React.FC<TrackCardProps> = ({
                 🔴 Morceau Sorti (Released)
               </span>
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="inline-flex items-center text-xs sm:text-sm font-extrabold font-mono text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-lg border border-amber-500/30">
-                  MP3 $0.99
-                </span>
-                <span className="text-neutral-500 text-xs">•</span>
-                <span className="inline-flex items-center text-xs sm:text-sm font-extrabold font-mono text-cyan-400 bg-cyan-500/15 px-2 py-0.5 rounded-lg border border-cyan-500/30">
-                  WAV $2.49
+                <span className="inline-flex items-center text-xs sm:text-sm font-extrabold font-mono text-amber-400 bg-amber-500/15 px-2.5 py-0.5 rounded-lg border border-amber-500/30">
+                  🟢 MP3 Social $0.99 USD
                 </span>
               </div>
             </div>
@@ -232,7 +228,7 @@ export const TrackCard: React.FC<TrackCardProps> = ({
               className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 px-4 py-2.5 text-xs sm:text-sm font-bold text-black shadow-lg shadow-emerald-500/25 hover:from-emerald-400 hover:to-emerald-300 active:scale-95 transition-all cursor-pointer shrink-0"
             >
               <ShoppingCart className="h-4 w-4 fill-black/30" />
-              <span>Buy Inédite ($2.49)</span>
+              <span>👑 Acheter Inédite ($2.49)</span>
             </button>
           ) : (
             <button
@@ -241,7 +237,7 @@ export const TrackCard: React.FC<TrackCardProps> = ({
               className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 px-4 py-2.5 text-xs sm:text-sm font-bold text-black shadow-lg shadow-amber-500/20 hover:from-amber-400 hover:to-amber-300 active:scale-95 transition-all cursor-pointer shrink-0"
             >
               <ShoppingCart className="h-4 w-4 fill-black/30" />
-              <span>Buy Now ($0.99)</span>
+              <span>⚡ Acheter MP3 ($0.99)</span>
             </button>
           )}
         </div>
@@ -250,7 +246,7 @@ export const TrackCard: React.FC<TrackCardProps> = ({
         <div className="flex items-center justify-between text-[10px] pt-1.5 border-t border-neutral-800/60 font-mono">
           {track.status === 'unreleased' ? (
             <>
-              <span className="text-emerald-400 font-bold">✅ Tout est autorisé ($2.49)</span>
+              <span className="text-emerald-400 font-bold">👑 WAV Full Sync : 100% Tout autorisé</span>
               {onOpenLicenses && (
                 <button
                   type="button"
@@ -264,7 +260,7 @@ export const TrackCard: React.FC<TrackCardProps> = ({
           ) : (
             <>
               <span className="text-neutral-400">
-                <span className="text-rose-400 font-bold">❌ Pas de streaming / sync</span> • Autre OK
+                <span className="text-rose-400 font-bold">🟢 MP3 Social : Sync &amp; Dist. interdits</span>
               </span>
               {onOpenLicenses && (
                 <button

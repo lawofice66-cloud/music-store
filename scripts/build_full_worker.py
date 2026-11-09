@@ -787,9 +787,9 @@ export default {{
     }}
 
     // -------------------------------------------------------------
-    // ROUTE: / and /index.html (Storefront HTML)
+    // Route: Classic Storefront standalone
     // -------------------------------------------------------------
-    if (pathname === '/' || pathname === '/index.html') {{
+    if (pathname === '/classic' || pathname === '/storefront-classic') {{
       return new Response(STOREFRONT_HTML, {{
         status: 200,
         headers: {{
@@ -800,18 +800,20 @@ export default {{
     }}
 
     // -------------------------------------------------------------
-    // Static Assets Fallback (Vite Frontend in ./dist if bound)
+    // Primary: Serve Vite React App from ./dist (Matches Google AI Studio)
     // -------------------------------------------------------------
     if (env.ASSETS) {{
       try {{
         const assetResponse = await env.ASSETS.fetch(request);
-        if (assetResponse.status !== 404) {{
+        if (assetResponse.status < 400) {{
           return assetResponse;
         }}
       }} catch (e) {{}}
     }}
 
-    // Default Fallback: Serve Storefront HTML
+    // -------------------------------------------------------------
+    // ROUTE: / and /index.html (Storefront HTML Fallback)
+    // -------------------------------------------------------------
     return new Response(STOREFRONT_HTML, {{
       status: 200,
       headers: {{

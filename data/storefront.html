@@ -1640,48 +1640,6 @@ footer{
   </div>
 </div>
 
-<!-- Floating AI Music Advisor Trigger -->
-<div id="aiAdvisorBtn" class="ai-advisor-trigger" onclick="toggleAIAdvisor()">
-  <span style="font-size:16px">✨</span>
-  <span>AI Music Advisor</span>
-  <span class="ai-badge">GEMINI 3.5</span>
-</div>
-
-<!-- Floating AI Music Advisor Panel -->
-<div id="aiAdvisorPanel" class="ai-advisor-panel" style="display:none">
-  <div class="ai-advisor-header">
-    <div style="display:flex;align-items:center;gap:8px">
-      <span style="font-size:18px">✨</span>
-      <div>
-        <div style="font-weight:800;font-size:13px;color:var(--gold-light)">Fallen 75 AI Music Advisor</div>
-        <div style="font-size:10px;color:#94a3b8">Powered by Gemini &amp; 140 Catalog Index</div>
-      </div>
-    </div>
-    <button onclick="toggleAiAdvisor()" style="background:none;border:none;color:#94a3b8;font-size:16px;cursor:pointer">✕</button>
-  </div>
-
-  <div id="aiChatThread" class="ai-chat-thread">
-    <div class="ai-msg assistant">
-      👋 <b>Welcome to the Fallen 75 Studio!</b><br>
-      I'm your AI Music Consultant. Looking for beats for a project (YouTube, TikTok, Ad), high-energy Drill, or details on our <b>$15 10-Track Pack</b>? Ask me anything!
-      
-      <div class="ai-chips">
-        <button class="ai-chip" onclick="askAiChip('Show me high-energy Drill &amp; Trap tracks')">🔥 Top Drill &amp; Trap</button>
-        <button class="ai-chip" onclick="askAiChip('What are the best tracks for YouTube and TikTok videos?')">🎬 For YouTube / TikTok</button>
-        <button class="ai-chip" onclick="askAiChip('Recommend deep cinematic and atmospheric instrumentals')">🎹 Cinematic &amp; Deep</button>
-        <button class="ai-chip" onclick="askAiChip('How does the 10-Track Master Pack ($15) work?')">📦 10-Pack Info ($15)</button>
-        <button class="ai-chip" onclick="askAiChip('What commercial rights are included with the license?')">📄 Commercial Rights</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="ai-chat-input-bar">
-    <input id="aiChatInput" type="text" placeholder="Ask about tracks, styles, licenses..." onkeydown="if(event.key==='Enter')sendAiMessage()">
-    <button id="aiChatMicBtn" class="voice-search-btn" style="padding:6px 10px" onclick="startAiVoiceInput()" title="Speak your question">🎙️</button>
-    <button class="btn btn-sm" style="padding:6px 12px;font-size:12px" onclick="sendAiMessage()">Send</button>
-  </div>
-</div>
-
 <!-- STICKY BOTTOM AUDIO PLAYER -->
 <div id="stickyPlayer" class="sticky-player">
   <div class="sticky-track-info">
@@ -2105,7 +2063,21 @@ function showStickyPlayer(t, globalIdx){
   const bg = t.coverImage || t.cover || randomUnsplash();
   document.getElementById('stickyThumb').style.backgroundImage = `url('${bg}')`;
   document.getElementById('stickyTitle').textContent = t.title;
-  document.getElementById('stickyBuyBtn').textContent = `⚡ Buy Now $${(t.price||0.99).toFixed(2)}`;
+
+  const isUnreleased = t.status === 'unreleased';
+  const mp3Btn = document.getElementById('stickyBuyMp3Btn');
+  const wavBtn = document.getElementById('stickyBuyWavBtn');
+  if (mp3Btn && wavBtn) {
+    if (isUnreleased) {
+      mp3Btn.style.display = 'none';
+      wavBtn.style.display = 'inline-flex';
+      wavBtn.textContent = '👑 Inédite WAV $2.49';
+    } else {
+      mp3Btn.style.display = 'inline-flex';
+      mp3Btn.textContent = '⚡ MP3 Social $0.99';
+      wavBtn.style.display = 'none';
+    }
+  }
 
   if(currentPlayingAudio){
     currentPlayingAudio.ontimeupdate = () => {
@@ -2167,16 +2139,22 @@ function closeStickyPlayer(){
 
 function buyCurrentStickyFormat(format = 'mp3'){
   if(currentPlayingIdx >= 0){
-    buySingleFormat(currentPlayingIdx, format);
+    const list = window.allTracks || allTracks || [];
+    const t = list[currentPlayingIdx];
+    const isUnreleased = t && t.status === 'unreleased';
+    buySingleFormat(currentPlayingIdx, isUnreleased ? 'wav' : 'mp3');
   }
 }
 function buyCurrentSticky(){
-  buyCurrentStickyFormat('mp3');
+  buyCurrentStickyFormat();
 }
 
 function addCurrentStickyToCart(){
   if(currentPlayingIdx >= 0){
-    addToCartFormat(currentPlayingIdx, 'mp3');
+    const list = window.allTracks || allTracks || [];
+    const t = list[currentPlayingIdx];
+    const isUnreleased = t && t.status === 'unreleased';
+    addToCartFormat(currentPlayingIdx, isUnreleased ? 'wav' : 'mp3');
   }
 }
 
@@ -2290,34 +2268,31 @@ function renderVitrine(){
             ${unreleased ? `
               <div style="display:flex;flex-direction:column">
                 <div style="display:flex;align-items:baseline;gap:5px">
-                  <span style="color:#4ade80;font-weight:900;font-size:15px">Inédite Master: $2.49</span>
+                  <span style="color:#4ade80;font-weight:900;font-size:15px">👑 Inédite Master : $2.49</span>
                 </div>
                 <div style="font-size:9.5px;color:#94a3b8">WAV 24-bit + MP3 Inclus</div>
               </div>
               <div style="display:flex;gap:4px;align-items:center">
-                <button class="cart-add-btn" onclick="addToCartFormat(${globalIdx}, 'wav')" title="Add Inédite Master to cart" style="padding:5px 7px;font-size:11px">🛒+Inédite</button>
-                <button class="btn btn-sm" onclick="buySingleFormat(${globalIdx}, 'wav')" title="Buy Inédite Studio Master for $2.49" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%);color:#000;font-weight:800;border-color:#34d399;padding:5px 10px;font-size:11px">👑 Inédite $2.49</button>
+                <button class="cart-add-btn" onclick="addToCartFormat(${globalIdx}, 'wav')" title="Ajouter Inédite au panier" style="padding:5px 7px;font-size:11px">🛒+Inédite</button>
+                <button class="btn btn-sm" onclick="buySingleFormat(${globalIdx}, 'wav')" title="Acheter Inédite Studio Master pour $2.49" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%);color:#000;font-weight:800;border-color:#34d399;padding:5px 10px;font-size:11px">👑 Inédite $2.49</button>
               </div>
             ` : `
               <div style="display:flex;flex-direction:column">
                 <div style="display:flex;align-items:baseline;gap:5px">
-                  <span style="color:#60a5fa;font-weight:800;font-size:13.5px">MP3 $0.99</span>
-                  <span style="color:#475569;font-size:11px">•</span>
-                  <span style="color:var(--gold-light);font-weight:900;font-size:15px">WAV $2.49</span>
+                  <span style="color:#60a5fa;font-weight:800;font-size:14px">🟢 MP3 Social : $0.99</span>
                 </div>
-                <div style="font-size:9.5px;color:#94a3b8">10-Track Pack: $15 ($1.50/ea)</div>
+                <div style="font-size:9.5px;color:#94a3b8">HQ 320kbps MP3 • Réseaux &amp; Fêtes</div>
               </div>
               <div style="display:flex;gap:4px;align-items:center">
-                <button class="cart-add-btn" onclick="addToCartFormat(${globalIdx}, 'mp3')" title="Add MP3 to cart" style="padding:5px 7px;font-size:11px">🛒+MP3</button>
-                <button class="btn btn-sm" onclick="buySingleFormat(${globalIdx}, 'mp3')" title="Buy MP3 for $0.99" style="background:#2563eb;color:#fff;border-color:#3b82f6;padding:5px 8px;font-size:11px">⚡ MP3 $0.99</button>
-                <button class="btn btn-sm" onclick="buySingleFormat(${globalIdx}, 'wav')" title="Buy WAV Master for $2.49" style="padding:5px 8px;font-size:11px">👑 WAV $2.49</button>
+                <button class="cart-add-btn" onclick="addToCartFormat(${globalIdx}, 'mp3')" title="Ajouter MP3 au panier" style="padding:5px 7px;font-size:11px">🛒+MP3</button>
+                <button class="btn btn-sm" onclick="buySingleFormat(${globalIdx}, 'mp3')" title="Acheter MP3 pour $0.99" style="background:#2563eb;color:#fff;border-color:#3b82f6;padding:5px 8px;font-size:11px">⚡ MP3 $0.99</button>
               </div>
             `}
           </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;font-size:9px;color:#94a3b8;margin-top:4px">
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:9.5px;margin-top:6px;padding-top:4px;border-top:1px solid rgba(255,255,255,0.06)">
             ${unreleased 
-              ? `<span style="color:#86efac">🟢 Morceau Inédit: Exclusive Master Delivery</span><span style="color:#fde047">Licence Studio Complète</span>`
-              : `<span style="color:#93c5fd">🟢 MP3: Social Monetization</span><span style="color:#fde047">👑 WAV: Full Sync &amp; Streaming</span>`
+              ? `<span style="color:#86efac;font-weight:700">👑 WAV: Full Sync &amp; Streaming</span><button type="button" onclick="openLicenceModal()" style="background:none;border:none;color:#fde047;font-size:9.5px;cursor:pointer;text-decoration:underline">📄 Tout est 100% autorisé</button>`
+              : `<span style="color:#93c5fd;font-weight:700">🟢 MP3: Social Monetization</span><button type="button" onclick="openLicenceModal()" style="background:none;border:none;color:#f87171;font-size:9.5px;cursor:pointer;text-decoration:underline">📄 Sync &amp; Dist. interdits</button>`
             }
           </div>
         </div>
@@ -2530,29 +2505,47 @@ function buySingleFormat(idx, format = 'mp3'){
   const list = window.allTracks || allTracks || [];
   const t = list[idx];
   if(!t) return;
-  const isWav = format === 'wav';
+  const isUnreleased = t.status === 'unreleased';
+  const effectiveFormat = isUnreleased ? 'wav' : 'mp3';
+  const isWav = effectiveFormat === 'wav';
   const price = isWav ? 2.49 : 0.99;
   const invoice = isWav ? '5007760299' : '5645678673';
 
   currentItem = {
-    title: `${t.title} (${isWav ? '24-Bit Studio Master WAV' : 'HQ 320kbps MP3'})`,
+    title: `${t.title} (${isWav ? '👑 Inédite WAV Master' : '🟢 MP3 Social'})`,
     price: price,
-    selectedFormat: format,
+    selectedFormat: effectiveFormat,
     slug: t.slug,
     description: isWav 
-      ? `👑 Unlimited Master Commercial License (24-Bit Studio Master WAV + MP3 + Full Film/TV Sync & Unlimited Streaming Distribution) for "${t.title}".`
-      : `🟢 Standard License (HQ 320kbps MP3 • Monetizable on TikTok, YouTube, Facebook, Parties & Videos) for "${t.title}".`
+      ? `👑 Inédite WAV Unlimited Master License (24-Bit Studio Master WAV + MP3 • 100% Tout est autorisé : Streaming Spotify/Apple, Sync TV/Film, Radio illimité) pour "${t.title}".`
+      : `🟢 Released MP3 Social License (HQ 320kbps MP3 • Monétisation TikTok, YouTube, DJ sets • Sync & Dist. Streaming interdits) pour "${t.title}".`
   };
 
   document.getElementById('modalTitle').textContent = currentItem.title;
   document.getElementById('modalDesc').textContent = currentItem.description;
   document.getElementById('payAmount').textContent = `${price.toFixed(2)} USDT / USD`;
 
+  const tierMp3 = document.getElementById('np-tier-5645678673');
+  const tierWav = document.getElementById('np-tier-5007760299');
+  if(tierMp3 && tierWav){
+    if(isUnreleased){
+      tierMp3.style.display = 'none';
+      tierWav.style.display = 'inline-flex';
+      tierWav.classList.add('active');
+      tierMp3.classList.remove('active');
+    } else {
+      tierMp3.style.display = 'inline-flex';
+      tierWav.style.display = 'none';
+      tierMp3.classList.add('active');
+      tierWav.classList.remove('active');
+    }
+  }
+
   const customField = document.getElementById('customTracksField');
   const buyerTracks = document.getElementById('buyerTracks');
   if(customField && buyerTracks){
     customField.style.display = 'block';
-    buyerTracks.value = `${t.title} [${format.toUpperCase()}]`;
+    buyerTracks.value = `${t.title} [${effectiveFormat.toUpperCase()}]`;
   }
 
   openCheckoutModal();
