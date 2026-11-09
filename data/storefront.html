@@ -3494,7 +3494,7 @@ async function load() {
 
     const statusEl = document.getElementById("status");
     if (statusEl && allTracks.length > 0) {
-      statusEl.textContent = ;
+      statusEl.textContent = allTracks.length + ' Studio Masters • FALLEN 75 FRANCE';
     }
     if (typeof updateFilterCounts === 'function') updateFilterCounts(allTracks, allClips);
     if (typeof updateCategoryCounts === 'function') updateCategoryCounts(allTracks, allClips);
@@ -3544,7 +3544,7 @@ async function load() {
         console.log('[FALLEN 75] 140 Studio Masters synced with server KV stats.');
         const statusEl = document.getElementById("status");
         if (statusEl) {
-          statusEl.textContent = ;
+          statusEl.textContent = allTracks.length + ' Studio Masters • FALLEN 75 FRANCE';
         }
       }
     })
