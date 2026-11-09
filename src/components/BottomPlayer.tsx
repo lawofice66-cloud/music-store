@@ -48,6 +48,10 @@ export const BottomPlayer: React.FC<BottomPlayerProps> = ({
     onSeek(ratio * duration);
   };
 
+  const cover = track.coverImage || track.cover || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80';
+  const trackBpm = track.bpm || 120;
+  const trackKey = track.key || 'Am';
+
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-neutral-800 bg-[#090a0f]/95 backdrop-blur-xl px-4 py-3 sm:px-6 shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.5)]">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
@@ -55,7 +59,7 @@ export const BottomPlayer: React.FC<BottomPlayerProps> = ({
         <div className="flex items-center gap-3 min-w-0 max-w-[220px] sm:max-w-[320px]">
           <div className="relative h-12 w-12 rounded-lg overflow-hidden shrink-0 border border-neutral-700 bg-neutral-900">
             <img
-              src={track.coverImage}
+              src={cover}
               alt={track.title}
               className="h-full w-full object-cover"
             />
@@ -71,11 +75,11 @@ export const BottomPlayer: React.FC<BottomPlayerProps> = ({
                 {track.title}
               </h4>
               <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">
-                {track.bpm} BPM
+                {trackBpm} BPM
               </span>
             </div>
             <div className="flex items-center gap-2 mt-0.5 text-xs text-neutral-400">
-              <span className="truncate">{track.key}</span>
+              <span className="truncate">{trackKey}</span>
               <span className="text-neutral-600">•</span>
               <span className="flex items-center gap-0.5 text-[11px] font-mono text-neutral-400 shrink-0">
                 <Headphones className="h-3 w-3 text-amber-400" />
@@ -152,14 +156,23 @@ export const BottomPlayer: React.FC<BottomPlayerProps> = ({
             />
           </div>
 
-          <button
-            onClick={() => onBuy(track)}
-            className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 px-3.5 py-2 text-xs sm:text-sm font-bold text-black hover:from-amber-400 hover:to-amber-300 active:scale-95 transition-all cursor-pointer shadow-lg shadow-amber-500/20"
-          >
-            <ShoppingCart className="h-4 w-4 fill-black/20" />
-            <span className="hidden sm:inline">Buy</span>
-            <span>From $0.99</span>
-          </button>
+          {track.status === 'unreleased' ? (
+            <button
+              onClick={() => onBuy(track)}
+              className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 px-3.5 py-2 text-xs sm:text-sm font-bold text-black hover:from-emerald-400 hover:to-emerald-300 active:scale-95 transition-all cursor-pointer shadow-lg shadow-emerald-500/25 shrink-0"
+            >
+              <ShoppingCart className="h-4 w-4 fill-black/30" />
+              <span>👑 Inédite ($2.49)</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => onBuy(track)}
+              className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 px-3.5 py-2 text-xs sm:text-sm font-bold text-black hover:from-amber-400 hover:to-amber-300 active:scale-95 transition-all cursor-pointer shadow-lg shadow-amber-500/20 shrink-0"
+            >
+              <ShoppingCart className="h-4 w-4 fill-black/20" />
+              <span>⚡ MP3 ($0.99)</span>
+            </button>
+          )}
 
           <button
             onClick={onClose}

@@ -35,8 +35,23 @@ export async function apiFetchTracks(): Promise<Track[]> {
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
-        saveStoredTracks(data); // keep local mirror
-        return data;
+        const normalized: Track[] = data.map((track: any) => {
+          const isUnreleased = track.status === 'unreleased';
+          return {
+            ...track,
+            price: isUnreleased ? 2.49 : 0.99,
+            mp3Price: 0.99,
+            wavPrice: 2.49,
+            currency: '$',
+            status: isUnreleased ? 'unreleased' : 'released',
+            tags: Array.isArray(track.tags) && track.tags.length > 0 ? track.tags : [track.category || 'Beat', 'Studio Master'],
+            bpm: track.bpm || 120,
+            key: track.key || 'Am',
+            coverImage: track.coverImage || track.cover || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80',
+          };
+        });
+        saveStoredTracks(normalized); // keep local mirror
+        return normalized;
       }
     }
   } catch (err) {

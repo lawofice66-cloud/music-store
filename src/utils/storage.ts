@@ -13,19 +13,20 @@ export function getStoredTracks(): Track[] {
       return INITIAL_TRACKS;
     }
     let parsed: Track[] = JSON.parse(raw);
-    let needsMigration = false;
     parsed = parsed.map((track) => {
-      if (track.currency === '€' || track.price === 35 || !track.mp3Price) {
-        needsMigration = true;
-        return {
-          ...track,
-          price: 0.99,
-          mp3Price: 0.99,
-          wavPrice: 2.49,
-          currency: '$',
-        };
-      }
-      return track;
+      const isUnreleased = track.status === 'unreleased';
+      return {
+        ...track,
+        price: isUnreleased ? 2.49 : 0.99,
+        mp3Price: 0.99,
+        wavPrice: 2.49,
+        currency: '$',
+        status: isUnreleased ? 'unreleased' : 'released',
+        tags: Array.isArray(track.tags) && track.tags.length > 0 ? track.tags : [track.category || 'Beat', 'Studio Master'],
+        bpm: track.bpm || 120,
+        key: track.key || 'Am',
+        coverImage: track.coverImage || (track as any).cover || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80',
+      };
     });
     // If the cached list has fewer tracks than the global catalog, upgrade seamlessly
     if (parsed.length < INITIAL_TRACKS.length) {
@@ -40,7 +41,7 @@ export function getStoredTracks(): Track[] {
       saveStoredTracks(merged);
       return merged;
     }
-    if (needsMigration) { saveStoredTracks(parsed); }
+    saveStoredTracks(parsed);
     return parsed;
   } catch (e) {
     console.error('Error reading tracks from storage', e);

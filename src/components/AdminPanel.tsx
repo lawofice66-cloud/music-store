@@ -260,12 +260,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
     const isEdit = !!editingTrackId;
     const numPrice = trackForm.price !== undefined ? Number(trackForm.price) : 0.99;
-    // Règle automatique stricte de classification :
-    // Si prix >= 2.49 USD -> Inédite (Unreleased)
-    // Si prix < 2.49 USD (ex: 0.99 USD) -> Sorti (Released)
-    const targetStatus: 'released' | 'unreleased' =
-      trackForm.status === 'unreleased' || numPrice >= 2.49 ? 'unreleased' : 'released';
-    const targetCategory = trackForm.category || targetStatus;
+    // Règle automatique stricte de l'utilisateur :
+    // À chaque fois qu'un prix est mis, le morceau rejoint automatiquement sa case correspondante !
+    // Si prix >= 2.49 USD -> Inédite (unreleased)
+    // Si prix < 2.49 USD (ex: 0.99 USD) -> Released (released)
+    const targetStatus: 'released' | 'unreleased' = numPrice >= 2.49 ? 'unreleased' : 'released';
+    const targetCategory = targetStatus;
 
     const trackToSave: Track = {
       id: editingTrackId || `track-${Date.now()}`,

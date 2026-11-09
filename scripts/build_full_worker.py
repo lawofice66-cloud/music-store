@@ -378,12 +378,18 @@ export default {{
               t.plays || baseline.plays,
               t.likes || baseline.likes
             );
+            const isUnreleased = t.status === 'unreleased';
             return {{
               ...t,
-              price: 0.99,
+              price: isUnreleased ? 2.49 : 0.99,
               mp3Price: 0.99,
               wavPrice: 2.49,
               currency: '$',
+              status: isUnreleased ? 'unreleased' : 'released',
+              tags: Array.isArray(t.tags) && t.tags.length > 0 ? t.tags : [t.category || 'Beat', 'Studio Master'],
+              bpm: t.bpm || 120,
+              key: t.key || 'Am',
+              coverImage: t.coverImage || t.cover || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80',
               plays: stats.plays,
               views: stats.plays,
               likes: stats.likes,
@@ -680,6 +686,54 @@ export default {{
     // -------------------------------------------------------------
     // API: /api/orders (GET & POST) & /api/orders/:id/status
     // -------------------------------------------------------------
+    if (pathname === '/api/orders' && request.method === 'GET') {{
+      let ordersList: any[] = [];
+      if (env.DB) {{
+        try {{
+          const res = await env.DB.prepare('SELECT * FROM orders ORDER BY createdAt DESC LIMIT 100').all();
+          if (res && res.results) ordersList = res.results;
+        }} catch (e) {{}}
+      }}
+      return new Response(JSON.stringify(ordersList), {{
+        headers: {{ ...corsHeaders, 'Content-Type': 'application/json' }},
+      }});
+    }}
+
+    if (pathname === '/api/payment-config') {{
+      if (request.method === 'POST') {{
+        try {{
+          const newConfig = await request.json();
+          if (kv) {{
+            await kv.put('payment_config', JSON.stringify(newConfig));
+          }}
+          return new Response(JSON.stringify({{ success: true, config: newConfig }}), {{
+            headers: {{ ...corsHeaders, 'Content-Type': 'application/json' }},
+          }});
+        }} catch (e: any) {{
+          return new Response(JSON.stringify({{ error: e.message }}), {{
+            status: 400,
+            headers: {{ ...corsHeaders, 'Content-Type': 'application/json' }},
+          }});
+        }}
+      }}
+      let stored: any = null;
+      if (kv) {{
+        try {{
+          const s = await kv.get('payment_config');
+          if (s) stored = JSON.parse(s);
+        }} catch (e) {{}}
+      }}
+      const config = stored || {{
+        nowpayments: {{ apiKey: '', ipnSecret: '', invoiceMp3: '5645678673', invoiceWav: '5007760299', invoicePack10: '4641195882' }},
+        cryptoWallets: {{ usdtTron: 'TJ1mH8b1h6q8u91x71j0f84a91u8h6q8u9', eth: '0x71C...a891', sol: 'Fallen...sol' }},
+        contactAddress: '75008 Paris, France', contactCity: 'Paris', contactCountry: 'France', contactPhone: '+33 6 00 00 00 00',
+        socialLinks: {{ spotify: 'https://open.spotify.com/artist/5iiVHI32IvfzR5QmE9FOoh', youtube: 'https://www.youtube.com/@fallen75france', tiktok: 'https://www.tiktok.com/@fallen75france', instagram: 'https://www.instagram.com/fallen75france' }},
+      }};
+      return new Response(JSON.stringify(config), {{
+        headers: {{ ...corsHeaders, 'Content-Type': 'application/json' }},
+      }});
+    }}
+
     if (pathname === '/api/orders' && request.method === 'POST') {{
       try {{
         const order = (await request.json().catch(() => ({{}}))) as any;

@@ -26,6 +26,10 @@ export const TrackCard: React.FC<TrackCardProps> = ({
   onOpenLicenses,
 }) => {
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const cover = track.coverImage || track.cover || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80';
+  const trackBpm = track.bpm || 120;
+  const trackKey = track.key || 'Am';
+  const trackTags = Array.isArray(track.tags) && track.tags.length > 0 ? track.tags : [track.category || 'Beat', 'Studio Master'];
 
   const formatTime = (secs: number) => {
     const mins = Math.floor(secs / 60);
@@ -49,7 +53,7 @@ export const TrackCard: React.FC<TrackCardProps> = ({
       <div>
         <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-neutral-900 border border-neutral-800">
           <img
-            src={track.coverImage}
+            src={cover}
             alt={track.title}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
@@ -71,10 +75,10 @@ export const TrackCard: React.FC<TrackCardProps> = ({
               </span>
             )}
             <span className="rounded-md bg-black/75 backdrop-blur-md px-2 py-0.5 text-xs font-mono font-bold text-amber-400 border border-amber-500/30">
-              {track.bpm} BPM
+              {trackBpm} BPM
             </span>
             <span className="rounded-md bg-black/75 backdrop-blur-md px-2 py-0.5 text-xs font-mono font-semibold text-neutral-300 border border-neutral-700">
-              {track.key}
+              {trackKey}
             </span>
           </div>
 
@@ -160,7 +164,7 @@ export const TrackCard: React.FC<TrackCardProps> = ({
           </p>
 
           <div className="mt-3 flex flex-wrap gap-1.5">
-            {track.tags.map((tag, idx) => (
+            {trackTags.map((tag, idx) => (
               <span
                 key={idx}
                 className="rounded bg-neutral-800/80 px-2 py-0.5 text-[11px] font-medium text-neutral-300 border border-neutral-700/60"
