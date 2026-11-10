@@ -56,7 +56,7 @@ async function startServer() {
   });
 
   // Admin Auth routes
-  app.post('/api/auth/login', (req, res) => {
+  app.post(['/api/auth/login', '/api/admin/login'], (req, res) => {
     const { password } = req.body || {};
     if (!password) {
       return res.status(400).json({ error: 'Mot de passe requis.' });
@@ -72,10 +72,10 @@ async function startServer() {
     });
   });
 
-  app.get('/api/auth/verify', (req, res) => {
+  app.get(['/api/auth/verify', '/api/admin/check'], (req, res) => {
     const authHeader = req.headers.authorization || (req.headers['x-admin-key'] as string);
     const isValid = verifyToken(authHeader);
-    return res.json({ valid: isValid });
+    return res.json({ valid: isValid, success: true, isAdmin: isValid });
   });
 
   // Tracks API

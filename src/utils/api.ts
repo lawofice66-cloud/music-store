@@ -1,4 +1,5 @@
 import { Track, PaymentConfig, Order } from '../types';
+import { INITIAL_PAYMENT_CONFIG } from '../data/initialData';
 import {
   getStoredTracks,
   saveStoredTracks,
@@ -177,19 +178,65 @@ export async function apiUploadMedia(
  * Fetch payment configuration
  */
 export async function apiFetchPaymentConfig(): Promise<PaymentConfig> {
+  const current = getStoredPaymentConfig();
   try {
     const res = await fetch('/api/payment-config');
     if (res.ok) {
       const data = await res.json();
-      if (data && data.cryptoWallets) {
-        saveStoredPaymentConfig(data);
-        return data;
+      if (data && typeof data === 'object') {
+        const merged: PaymentConfig = {
+          ...INITIAL_PAYMENT_CONFIG,
+          ...current,
+          ...data,
+          crypto: {
+            ...INITIAL_PAYMENT_CONFIG.crypto,
+            ...(current?.crypto || {}),
+            ...(data.crypto || {}),
+            usdtTron: {
+              ...INITIAL_PAYMENT_CONFIG.crypto.usdtTron,
+              ...(current?.crypto?.usdtTron || {}),
+              ...(data.crypto?.usdtTron || {}),
+              address:
+                data.crypto?.usdtTron?.address ||
+                data.cryptoWallets?.usdtTron ||
+                current?.crypto?.usdtTron?.address ||
+                INITIAL_PAYMENT_CONFIG.crypto.usdtTron.address,
+            },
+            ethereum: {
+              ...INITIAL_PAYMENT_CONFIG.crypto.ethereum,
+              ...(current?.crypto?.ethereum || {}),
+              ...(data.crypto?.ethereum || {}),
+              address:
+                data.crypto?.ethereum?.address ||
+                data.cryptoWallets?.eth ||
+                current?.crypto?.ethereum?.address ||
+                INITIAL_PAYMENT_CONFIG.crypto.ethereum.address,
+            },
+            solana: {
+              ...INITIAL_PAYMENT_CONFIG.crypto.solana,
+              ...(current?.crypto?.solana || {}),
+              ...(data.crypto?.solana || {}),
+              address:
+                data.crypto?.solana?.address ||
+                data.cryptoWallets?.sol ||
+                current?.crypto?.solana?.address ||
+                INITIAL_PAYMENT_CONFIG.crypto.solana.address,
+            },
+          },
+          otherMethods: {
+            ...INITIAL_PAYMENT_CONFIG.otherMethods,
+            ...(current?.otherMethods || {}),
+            ...(data.otherMethods || {}),
+          },
+        };
+        saveStoredPaymentConfig(merged);
+        return merged;
       }
     }
   } catch (err) {
     console.warn('Could not fetch payment config from API, using mirror:', err);
   }
-  return getStoredPaymentConfig();
+  return current;
 }
 
 /**

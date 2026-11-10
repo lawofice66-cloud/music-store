@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Track, PaymentConfig, Order } from '../types';
 import { generateWalletQrSvg } from '../utils/qrCode';
+import { INITIAL_PAYMENT_CONFIG } from '../data/initialData';
 
 interface PaymentModalProps {
   track: Track;
@@ -110,12 +111,15 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
     setSubmitting(true);
 
+    const safeCrypto = paymentConfig?.crypto || INITIAL_PAYMENT_CONFIG.crypto;
+    const safeOtherMethods = paymentConfig?.otherMethods || INITIAL_PAYMENT_CONFIG.otherMethods;
+
     const paymentMethodLabel =
       activeTab === 'nowpayments'
         ? 'NOWPayments (Card & 300+ Crypto)'
         : activeTab === 'crypto'
-        ? paymentConfig.crypto[selectedCrypto].label
-        : paymentConfig.otherMethods[selectedOther]?.label || 'Skrill/RedotPay';
+        ? (safeCrypto?.[selectedCrypto]?.label || 'Crypto Transfer')
+        : (safeOtherMethods?.[selectedOther]?.label || 'Skrill/RedotPay');
 
     setTimeout(() => {
       const newOrder = onSubmitOrder({
@@ -134,13 +138,28 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     }, 400);
   };
 
-  const currentCrypto = paymentConfig.crypto[selectedCrypto];
-  const currentOther = paymentConfig.otherMethods[selectedOther] || {
-    label: selectedOther === 'redotpay' ? 'RedotPay (Visa Card)' : 'Skrill',
-    account: selectedOther === 'redotpay' ? 'lawofice66@gmail.com' : 'azzoulaali@hotmail.com',
-    instructions: '',
-    active: true,
-  };
+  const safeCrypto = paymentConfig?.crypto || INITIAL_PAYMENT_CONFIG.crypto;
+  const safeOtherMethods = paymentConfig?.otherMethods || INITIAL_PAYMENT_CONFIG.otherMethods;
+
+  const currentCrypto =
+    safeCrypto?.[selectedCrypto] ||
+    INITIAL_PAYMENT_CONFIG.crypto[selectedCrypto] || {
+      label: 'USDT (TRC20)',
+      network: 'TRON Network (TRC20)',
+      address: 'TGCFdvC4qCJNUJpt31TyxuVCM1doERyJAe',
+      buttonText: 'Copy USDT Address',
+      active: true,
+      instructions: 'Send only USDT via the TRON network (TRC20).',
+    };
+
+  const currentOther =
+    safeOtherMethods?.[selectedOther] ||
+    INITIAL_PAYMENT_CONFIG.otherMethods[selectedOther] || {
+      label: selectedOther === 'redotpay' ? 'RedotPay (Visa Card)' : 'Skrill',
+      account: selectedOther === 'redotpay' ? 'lawofice66@gmail.com' : 'azzoulaali@hotmail.com',
+      instructions: '',
+      active: true,
+    };
 
   const nowPaymentsIid = selectedFormat === 'wav' ? '5007760299' : '5645678673';
   const nowPaymentsPayUrl = `https://nowpayments.io/payment/?iid=${nowPaymentsIid}&source=button`;
@@ -173,7 +192,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
             <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl overflow-hidden border border-neutral-700 bg-neutral-900 shrink-0">
               <img
-                src={track.coverImage}
+                src={track.coverImage || (track as any).cover || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600'}
                 alt={track.title}
                 className="h-full w-full object-cover"
               />
@@ -185,7 +204,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 </span>
                 <span className="text-neutral-500">•</span>
                 <span className="text-[11px] sm:text-xs text-neutral-400 font-mono">
-                  {track.bpm} BPM / {track.key}
+                  {track.bpm || 120} BPM / {track.key || 'Am'}
                 </span>
               </div>
               <h2 className="text-base sm:text-lg font-bold text-white tracking-wide truncate max-w-[160px] sm:max-w-xs">
@@ -705,7 +724,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 {/* Method selector */}
                 <div className="grid grid-cols-2 gap-2">
                   {(['skrill', 'redotpay'] as OtherKey[]).map((key) => {
-                    const method = paymentConfig.otherMethods[key];
+                    const method = safeOtherMethods?.[key] || INITIAL_PAYMENT_CONFIG.otherMethods[key];
                     if (!method) return null;
                     return (
                       <button

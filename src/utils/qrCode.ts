@@ -15,11 +15,14 @@ function hashString(str: string): number[] {
   return hash;
 }
 
-export function generateWalletQrSvg(address: string, size = 180): string {
+export function generateWalletQrSvg(address?: string, size = 180): string {
   // We produce a clean SVG QR code visual with standard finder corners and deterministic data cells
+  const safeAddress = (address && typeof address === 'string' && address.trim().length > 0)
+    ? address.trim()
+    : 'TGCFdvC4qCJNUJpt31TyxuVCM1doERyJAe';
   const gridSize = 25;
   const cellSize = size / gridSize;
-  const hash = hashString(address);
+  const hash = hashString(safeAddress);
 
   const rects: string[] = [];
 
@@ -47,8 +50,8 @@ export function generateWalletQrSvg(address: string, size = 180): string {
       if ((r < 8 && c < 8) || (r < 8 && c >= gridSize - 8) || (r >= gridSize - 8 && c < 8)) {
         continue;
       }
-      const charIndex = (r * gridSize + c) % address.length;
-      const charCode = address.charCodeAt(charIndex);
+      const charIndex = (r * gridSize + c) % safeAddress.length;
+      const charCode = safeAddress.charCodeAt(charIndex);
       const hashVal = hash[(r + c) % hash.length] || 0;
       if ((charCode + hashVal + r * 3 + c * 7) % 3 === 0) {
         rects.push(`<rect x="${c * cellSize}" y="${r * cellSize}" width="${cellSize - 0.2}" height="${cellSize - 0.2}" rx="1" fill="#e2e8f0" />`);

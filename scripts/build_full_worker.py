@@ -724,10 +724,73 @@ export default {{
         }} catch (e) {{}}
       }}
       const config = stored || {{
-        nowpayments: {{ apiKey: '', ipnSecret: '', invoiceMp3: '5645678673', invoiceWav: '5007760299', invoicePack10: '4641195882' }},
-        cryptoWallets: {{ usdtTron: 'TJ1mH8b1h6q8u91x71j0f84a91u8h6q8u9', eth: '0x71C...a891', sol: 'Fallen...sol' }},
-        contactAddress: '75008 Paris, France', contactCity: 'Paris', contactCountry: 'France', contactPhone: '+33 6 00 00 00 00',
-        socialLinks: {{ spotify: 'https://open.spotify.com/artist/5iiVHI32IvfzR5QmE9FOoh', youtube: 'https://www.youtube.com/@fallen75france', tiktok: 'https://www.tiktok.com/@fallen75france', instagram: 'https://www.instagram.com/fallen75france' }},
+        crypto: {{
+          usdtTron: {{
+            label: 'USDT (TRC20)',
+            network: 'TRON Network (TRC20)',
+            address: 'TGCFdvC4qCJNUJpt31TyxuVCM1doERyJAe',
+            buttonText: 'Copy USDT Address',
+            active: true,
+            instructions: 'Send only USDT via the TRON network (TRC20).',
+          }},
+          ethereum: {{
+            label: 'Ethereum (ETH)',
+            network: 'Ethereum Mainnet (ERC20)',
+            address: '0x983dA5413e8755f027DaF36611f1D98Ecfce0300',
+            buttonText: 'Copy Ethereum Address',
+            active: true,
+            instructions: 'Send ETH or ERC20 tokens strictly on the Ethereum Mainnet.',
+          }},
+          solana: {{
+            label: 'Solana (SOL)',
+            network: 'Solana Network (SOL)',
+            address: 'HkxrjqehskPQy5HPw5zYKtQo877ntWScffMCHgXphW72',
+            buttonText: 'Copy Solana Address',
+            active: true,
+            instructions: 'Send SOL strictly on the native Solana Mainnet.',
+          }},
+        }},
+        otherMethods: {{
+          skrill: {{
+            label: 'Skrill',
+            account: 'azzoulaali@hotmail.com',
+            instructions: 'Send a direct Skrill transfer to azzoulaali@hotmail.com with the beat title as transaction reference.',
+            active: true,
+          }},
+          redotpay: {{
+            label: 'RedotPay (Visa Card)',
+            account: 'lawofice66@gmail.com',
+            beneficiaryName: 'Azzoula Ali',
+            instructions: 'Transfer to RedotPay account / Redot Visa card using email lawofice66@gmail.com (Cardholder: Azzoula Ali). Include the beat title.',
+            active: true,
+          }},
+        }},
+        adminPasswordHash: 'FALLEN2026AA',
+        contactEmail: 'lawofice66@gmail.com',
+        contactAddress: '75 Rue de Paris, 75000 Paris, France',
+        contactCity: 'Paris',
+        contactCountry: 'France',
+        contactPhone: '+33 1 42 68 75 00',
+        socialLinks: {{
+          youtube: 'https://youtube.com/@fallen75france',
+          instagram: 'https://instagram.com/fallen75france',
+          twitter: 'https://x.com/fallen75france',
+          soundcloud: 'https://soundcloud.com/fallen75france',
+          spotify: 'https://open.spotify.com/artist/fallen75france',
+          telegram: 'https://t.me/fallen75france',
+        }},
+        nowpayments: {{
+          apiKey: '',
+          ipnSecret: '',
+          invoiceMp3: '5645678673',
+          invoiceWav: '5007760299',
+          invoicePack10: '4641195882',
+        }},
+        cryptoWallets: {{
+          usdtTron: 'TGCFdvC4qCJNUJpt31TyxuVCM1doERyJAe',
+          eth: '0x983dA5413e8755f027DaF36611f1D98Ecfce0300',
+          sol: 'HkxrjqehskPQy5HPw5zYKtQo877ntWScffMCHgXphW72',
+        }},
       }};
       return new Response(JSON.stringify(config), {{
         headers: {{ ...corsHeaders, 'Content-Type': 'application/json' }},
