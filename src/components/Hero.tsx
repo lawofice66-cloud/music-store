@@ -1,0 +1,321 @@
+import React from 'react';
+import {
+  Disc3,
+  ShieldCheck,
+  Zap,
+  Radio,
+  Search,
+  Mail,
+  Youtube,
+  Instagram,
+  Twitter,
+  Send,
+  Music,
+  FileCode,
+} from 'lucide-react';
+import { CREEM_CONFIG } from '../config/creem';
+
+interface HeroProps {
+  searchQuery: string;
+  onSearchChange: (q: string) => void;
+  selectedTag: string;
+  onTagSelect: (tag: string) => void;
+  availableTags: string[];
+  totalTracks: number;
+  unreleasedCount?: number;
+  releasedCount?: number;
+  instrumentalsCount?: number;
+  acapellaCount?: number;
+  frenchCount?: number;
+  englishCount?: number;
+  likedCount?: number;
+  onOpenContact?: () => void;
+  onOpenLicenses?: () => void;
+}
+
+export const Hero: React.FC<HeroProps> = ({
+  searchQuery,
+  onSearchChange,
+  selectedTag,
+  onTagSelect,
+  totalTracks,
+  unreleasedCount = 51,
+  releasedCount = 89,
+  instrumentalsCount = 30,
+  acapellaCount = 18,
+  frenchCount = 33,
+  englishCount = 59,
+  likedCount = 0,
+  onOpenContact,
+  onOpenLicenses,
+}) => {
+  const { releasedMp3, unreleasedWav, unreleasedPack10 } = CREEM_CONFIG.products;
+
+  return (
+    <section className="relative overflow-hidden border-b border-neutral-800/60 bg-gradient-to-b from-[#0e1017] via-[#090a0f] to-[#090a0f] pt-10 pb-8 px-4 sm:px-6">
+      {/* Subtle background glow effect */}
+      <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-96 w-full max-w-4xl bg-gradient-to-b from-amber-500/10 via-amber-500/5 to-transparent blur-3xl" />
+
+      <div className="relative mx-auto max-w-7xl">
+        {/* Top Brand Tag and Contact Pill */}
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-amber-400 border border-amber-500/25">
+              <Radio className="h-3.5 w-3.5 animate-pulse text-amber-400" />
+              <span>Official Beat Store</span>
+            </div>
+            <span className="text-xs font-mono text-neutral-400">
+              {CREEM_CONFIG.siteDomain}
+            </span>
+          </div>
+
+          {/* Social Media & Contact Quick Links */}
+          <div className="flex flex-wrap items-center gap-2">
+            {onOpenLicenses && (
+              <button
+                id="hero-licenses-btn"
+                onClick={onOpenLicenses}
+                className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500/20 to-amber-600/10 hover:from-amber-500/30 hover:to-amber-600/20 px-3.5 py-1 text-xs font-bold text-amber-300 border border-amber-500/40 transition-all hover:scale-105 cursor-pointer shadow-sm"
+                title="View License Terms"
+              >
+                <FileCode className="h-3.5 w-3.5 text-amber-400" />
+                <span>
+                  View Licenses ({releasedMp3.priceFormatted} / {unreleasedWav.priceFormatted} / {unreleasedPack10.priceFormatted})
+                </span>
+              </button>
+            )}
+
+            {onOpenContact && (
+              <button
+                onClick={onOpenContact}
+                className="inline-flex items-center gap-1.5 rounded-full bg-neutral-900 hover:bg-neutral-800 px-3 py-1 text-xs font-medium text-amber-400 border border-amber-500/30 transition-all hover:scale-105 cursor-pointer"
+              >
+                <Mail className="h-3 w-3" />
+                <span>Contact</span>
+              </button>
+            )}
+            <div className="flex items-center gap-1 text-neutral-400">
+              <a
+                href="https://youtube.com/@fallen75france"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-1 hover:text-red-400 transition-colors"
+                title="YouTube"
+              >
+                <Youtube className="h-3.5 w-3.5" />
+              </a>
+              <a
+                href="https://instagram.com/fallen75france"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-1 hover:text-pink-400 transition-colors"
+                title="Instagram"
+              >
+                <Instagram className="h-3.5 w-3.5" />
+              </a>
+              <a
+                href="https://x.com/fallen75france"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-1 hover:text-blue-400 transition-colors"
+                title="X / Twitter"
+              >
+                <Twitter className="h-3.5 w-3.5" />
+              </a>
+              <a
+                href="https://open.spotify.com/artist/fallen75france"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-1 hover:text-emerald-400 transition-colors"
+                title="Spotify"
+              >
+                <Music className="h-3.5 w-3.5" />
+              </a>
+              <a
+                href="https://t.me/fallen75france"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-1 hover:text-sky-400 transition-colors"
+                title="Telegram"
+              >
+                <Send className="h-3.5 w-3.5" />
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Hero Title & Subheading */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+          <div className="max-w-2xl">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white font-['Plus_Jakarta_Sans']">
+              {CREEM_CONFIG.brandName}
+            </h1>
+            <p className="mt-2 text-base sm:text-lg font-medium text-amber-400/90 tracking-wide">
+              Official Catalog of {totalTracks} Beats &amp; Instrumentals on {CREEM_CONFIG.siteDomain}
+            </p>
+            <p className="mt-3 text-xs sm:text-sm text-neutral-400 leading-relaxed max-w-xl">
+              Stream studio previews live and purchase licenses securely via Creem. {CREEM_CONFIG.checkoutNote}
+            </p>
+          </div>
+
+          {/* Quick Stats / Highlights */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="rounded-xl border border-neutral-800 bg-[#12141f]/70 p-3 backdrop-blur-sm">
+              <div className="flex items-center gap-1.5 text-amber-400 text-xs font-bold">
+                <Zap className="h-4 w-4" />
+                <span>24-bit WAV</span>
+              </div>
+              <p className="text-[11px] text-neutral-400 mt-1">Master Studio Quality</p>
+            </div>
+
+            <div className="rounded-xl border border-neutral-800 bg-[#12141f]/70 p-3 backdrop-blur-sm">
+              <div className="flex items-center gap-1.5 text-amber-400 text-xs font-bold">
+                <ShieldCheck className="h-4 w-4" />
+                <span>Creem Checkout</span>
+              </div>
+              <p className="text-[11px] text-neutral-400 mt-1">
+                {releasedMp3.priceFormatted} • {unreleasedWav.priceFormatted} • {unreleasedPack10.priceFormatted}
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-neutral-800 bg-[#12141f]/70 p-3 backdrop-blur-sm col-span-2 sm:col-span-1">
+              <div className="flex items-center gap-1.5 text-amber-400 text-xs font-bold">
+                <Disc3 className="h-4 w-4" />
+                <span>{totalTracks} Tracks</span>
+              </div>
+              <p className="text-[11px] text-neutral-400 mt-1">Ready for Recording</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Filter and Search Bar */}
+        <div className="mt-8 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 pt-6 border-t border-neutral-800/80">
+          {/* Tag & Category Pills */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            {/* All Tracks */}
+            <button
+              id="filter-btn-all"
+              onClick={() => onTagSelect('all')}
+              className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                selectedTag === 'all'
+                  ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
+                  : 'bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800 border border-neutral-800'
+              }`}
+            >
+              All Beats ({totalTracks})
+            </button>
+
+            {/* Unreleased ($2.45) */}
+            <button
+              id="filter-btn-unreleased"
+              onClick={() => onTagSelect('unreleased')}
+              className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                selectedTag === 'unreleased'
+                  ? 'bg-emerald-500 text-black shadow-md shadow-emerald-500/25 ring-2 ring-emerald-400'
+                  : 'bg-emerald-950/40 text-emerald-300 hover:text-white hover:bg-emerald-900/60 border border-emerald-500/40'
+              }`}
+            >
+              <span>Unreleased ({unreleasedCount})</span>
+              <span className="text-[10px] bg-emerald-400/20 text-emerald-200 px-1.5 py-0.2 rounded font-mono font-black">
+                {unreleasedWav.priceFormatted}
+              </span>
+            </button>
+
+            {/* Released ($1.00) */}
+            <button
+              id="filter-btn-released"
+              onClick={() => onTagSelect('released')}
+              className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                selectedTag === 'released'
+                  ? 'bg-rose-500 text-white shadow-md shadow-rose-500/25 ring-2 ring-rose-400'
+                  : 'bg-rose-950/40 text-rose-300 hover:text-white hover:bg-rose-900/60 border border-rose-500/40'
+              }`}
+            >
+              <span>Released ({releasedCount})</span>
+              <span className="text-[10px] bg-rose-400/20 text-rose-200 px-1.5 py-0.2 rounded font-mono font-black">
+                {releasedMp3.priceFormatted}
+              </span>
+            </button>
+
+            {/* Instrumentals */}
+            <button
+              id="filter-btn-instrumentals"
+              onClick={() => onTagSelect('instrumentals')}
+              className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                selectedTag === 'instrumentals'
+                  ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
+                  : 'bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800 border border-neutral-800'
+              }`}
+            >
+              Instrumentals ({instrumentalsCount})
+            </button>
+
+            {/* Acapella */}
+            <button
+              id="filter-btn-acapella"
+              onClick={() => onTagSelect('acapella')}
+              className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                selectedTag === 'acapella'
+                  ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
+                  : 'bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800 border border-neutral-800'
+              }`}
+            >
+              Acapella ({acapellaCount})
+            </button>
+
+            {/* French */}
+            <button
+              id="filter-btn-french"
+              onClick={() => onTagSelect('french')}
+              className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                selectedTag === 'french'
+                  ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
+                  : 'bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800 border border-neutral-800'
+              }`}
+            >
+              French ({frenchCount})
+            </button>
+
+            {/* English */}
+            <button
+              id="filter-btn-english"
+              onClick={() => onTagSelect('english')}
+              className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                selectedTag === 'english'
+                  ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
+                  : 'bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800 border border-neutral-800'
+              }`}
+            >
+              English ({englishCount})
+            </button>
+
+            {/* Favorites */}
+            <button
+              id="filter-btn-favorites"
+              onClick={() => onTagSelect('favorites')}
+              className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                selectedTag === 'favorites'
+                  ? 'bg-red-500 text-white shadow-md shadow-red-500/20'
+                  : 'bg-neutral-900 text-neutral-300 hover:text-white hover:bg-neutral-800 border border-neutral-800'
+              }`}
+            >
+              <span className="text-red-400">♥</span> Favorites ({likedCount})
+            </button>
+          </div>
+
+          {/* Search Input */}
+          <div className="relative min-w-[240px] sm:min-w-[280px]">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+            <input
+              type="text"
+              placeholder="Search by beat title, BPM, genre..."
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="w-full rounded-xl border border-neutral-800 bg-[#12141f] pl-10 pr-4 py-2 text-xs sm:text-sm text-white placeholder-neutral-500 focus:border-amber-400 focus:outline-none"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
