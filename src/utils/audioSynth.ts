@@ -88,7 +88,13 @@ class AudioEngine {
     this.currentBpm = track.bpm || 130;
     this.currentPreset = track.audioPreset || 'drill_dark';
 
-    // Check if an audio preview URL exists or was uploaded
+    // Ensure audio context is active
+    if (this.ctx && this.ctx.state === 'suspended') {
+      try {
+        await this.ctx.resume();
+      } catch (e) {}
+    }
+
     const directUrl = track.audioPreviewUrl?.trim() || '';
     const hasValidAudioSource = Boolean(
       directUrl &&
@@ -100,23 +106,10 @@ class AudioEngine {
     );
 
     if (hasValidAudioSource) {
-      let fallbackTriggered = false;
-      const doFallback = () => {
-        if (fallbackTriggered) return;
-        fallbackTriggered = true;
-        if (this.audioElement) {
-          this.audioElement.pause();
-          this.audioElement.removeAttribute('src');
-          this.audioElement.load();
-        }
-        if (this.currentTrackId === track.id) {
-          this.startSynthPreview(this.currentBpm, this.currentPreset);
-        }
-      };
-
       try {
         if (!this.audioElement) {
           this.audioElement = new Audio();
+          this.audioElement.crossOrigin = 'anonymous';
         }
         this.audioElement.src = directUrl;
         this.audioElement.volume = this.volume;
@@ -136,7 +129,8 @@ class AudioEngine {
         };
 
         this.audioElement.onerror = () => {
-          doFallback();
+          // Fallback to rich synth preview on network/CORS error
+          this.startSynthPreview(this.currentBpm, this.currentPreset);
         };
 
         await this.audioElement.play();
@@ -144,13 +138,13 @@ class AudioEngine {
         this.isPlaying = true;
         this.notify();
         return;
-      } catch {
-        doFallback();
-        return;
+      } catch (err) {
+        // Fallback to rich synth preview if browser blocks HTML audio autoplay
+        console.warn('HTMLAudio play error, falling back to synth preview:', err);
       }
     }
 
-    // Direct instantaneous studio beat synth preview (0ms latency, always plays)
+    // Default to instantaneous studio beat synth preview (100% reliable sound)
     this.startSynthPreview(this.currentBpm, this.currentPreset);
   }
 
