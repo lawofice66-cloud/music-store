@@ -506,7 +506,7 @@ export default function App() {
                           </span>
                         </div>
                         <p className="text-xs text-emerald-200/80 mt-0.5">
-                          Never distributed, never released • <strong className="text-emerald-300 font-mono">WAV {CREEM_CONFIG.products.unreleasedWav.priceFormatted}</strong> • <strong className="text-amber-300 font-mono">10-Track Pack {CREEM_CONFIG.products.unreleasedPack10.priceFormatted}</strong>
+                          Never distributed, never released • <strong className="text-emerald-300 font-mono">WAV {CREEM_CONFIG.products.unreleasedWav.priceFormatted}</strong> • <strong className="text-amber-300 font-mono">10-Track Pack {CREEM_CONFIG.products.unreleasedPack10.priceFormatted}</strong> • <strong className="text-purple-300 font-mono">Permanent {CREEM_CONFIG.products.permanentLicense.priceFormatted}</strong>
                         </p>
                       </div>
                     </div>
@@ -563,7 +563,7 @@ export default function App() {
                           </span>
                         </div>
                         <p className="text-xs text-rose-200/80 mt-0.5">
-                          Already distributed tracks • <strong className="text-amber-300 font-mono">MP3 {CREEM_CONFIG.products.releasedMp3.priceFormatted}</strong> • <strong className="text-emerald-300 font-mono">WAV {CREEM_CONFIG.products.unreleasedWav.priceFormatted}</strong> • <strong className="text-amber-200 font-mono">10-Track Pack {CREEM_CONFIG.products.unreleasedPack10.priceFormatted}</strong>
+                          Already distributed tracks • <strong className="text-amber-300 font-mono">MP3 {CREEM_CONFIG.products.releasedMp3.priceFormatted}</strong> • <strong className="text-emerald-300 font-mono">WAV {CREEM_CONFIG.products.unreleasedWav.priceFormatted}</strong> • <strong className="text-amber-200 font-mono">10-Track Pack {CREEM_CONFIG.products.unreleasedPack10.priceFormatted}</strong> • <strong className="text-purple-300 font-mono">Permanent {CREEM_CONFIG.products.permanentLicense.priceFormatted}</strong>
                         </p>
                       </div>
                     </div>
