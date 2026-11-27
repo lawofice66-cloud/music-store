@@ -42,6 +42,12 @@ import { Footer } from './components/Footer';
 import { CREEM_CONFIG } from './config/creem';
 import { Music, Disc3, Sparkles, Heart, Flame, ArrowUpDown } from 'lucide-react';
 
+// Creem Checkout Links (4 Products):
+// 1. https://www.creem.io/payment/prod_35P7g5itdW4ytsIHc9vgBZ
+// 2. https://www.creem.io/payment/prod_5E701tbx3wXcTie3aCMtrk
+// 3. https://www.creem.io/payment/prod_7kcKZnJ8lwBorM0zHm5DLg
+// 4. https://www.creem.io/payment/prod_5u3cTuuduQTUfXCIjzVzsl
+
 function getInitialViewFromPath(): 'store' | 'admin' | 'privacy' | 'terms' {
   if (typeof window === 'undefined') return 'store';
   const path = window.location.pathname.replace(/\/+$/, '').toLowerCase();
@@ -144,7 +150,6 @@ export default function App() {
           saveStoredOrders(fetchedOrders);
         }
       } catch (err) {
-        // Keep using local state if offline or during local boot
         console.warn('Backend sync in progress:', err);
       }
     }
@@ -215,7 +220,6 @@ export default function App() {
       return matchesTag && matchesSearch;
     });
 
-    // Apply sorting
     return [...list].sort((a, b) => {
       if (sortBy === 'popular') {
         return (b.plays || 0) - (a.plays || 0);
@@ -229,7 +233,6 @@ export default function App() {
       if (sortBy === 'priceDesc') {
         return b.price - a.price;
       }
-      // 'featured' (HOT tracks first)
       if (a.featured && !b.featured) return -1;
       if (!a.featured && b.featured) return 1;
       return 0;
@@ -240,9 +243,8 @@ export default function App() {
   const handleToggleLike = async (track: Track) => {
     const isCurrentlyLiked = likedTrackIds.has(track.id);
     const newSet = saveLocalLikedTrackId(track.id, !isCurrentlyLiked);
-    setLikedTrackIds(new Set(newSet));
+    setLikedTrackIds(newSet);
 
-    // Update track in local state
     setTracks((prev) =>
       prev.map((t) => {
         if (t.id === track.id) {
@@ -253,7 +255,6 @@ export default function App() {
       })
     );
 
-    // Sync to backend D1 / server
     await apiToggleLike(track.id, !isCurrentlyLiked);
   };
 
@@ -261,7 +262,6 @@ export default function App() {
   const handleTogglePlay = (track: Track) => {
     const isSameTrack = audioState.trackId === track.id;
     if (!isSameTrack || !audioState.isPlaying) {
-      // Record play count
       setTracks((prev) =>
         prev.map((t) => (t.id === track.id ? { ...t, plays: (t.plays || 0) + 1 } : t))
       );
@@ -279,44 +279,10 @@ export default function App() {
     audioEngine.setVolume(newVol);
   };
 
-  // Order Submission (from Payment Modal)
-  const handleSubmitOrder = (orderData: {
-    clientEmail: string;
-    paymentMethod: string;
-    txHashOrRef: string;
-    clientNotes: string;
-    price?: number;
-    currency?: string;
-    licenseType?: string;
-  }): Order => {
-    if (!selectedTrackForBuy) throw new Error('No track selected');
-
-    const newOrder: Order = {
-      id: `F75-ORD-${Math.floor(1000 + Math.random() * 9000)}`,
-      trackId: selectedTrackForBuy.id,
-      trackTitle: selectedTrackForBuy.title,
-      licenseType: orderData.licenseType || `${CREEM_CONFIG.products.releasedMp3.licenseName} (${CREEM_CONFIG.products.releasedMp3.priceFormatted})`,
-      price: orderData.price ?? selectedTrackForBuy.price ?? CREEM_CONFIG.products.releasedMp3.price,
-      currency: orderData.currency || selectedTrackForBuy.currency || '$',
-      clientEmail: orderData.clientEmail,
-      paymentMethod: orderData.paymentMethod,
-      txHashOrRef: orderData.txHashOrRef,
-      clientNotes: orderData.clientNotes,
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-      downloadToken: `dl_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-    };
-
-    const updatedOrders = [newOrder, ...orders];
-    setOrders(updatedOrders);
-    saveStoredOrders(updatedOrders);
-
-    // Asynchronously persist to Cloudflare D1 / database
-    apiSubmitOrder(newOrder).catch((err) => {
-      console.warn('Could not persist order to server API:', err);
-    });
-
-    return newOrder;
+  // Order Submission / Redirection to Creem
+  const handleSubmitOrder = (orderData: { creemUrl?: string }) => {
+    const creemUrl = orderData?.creemUrl || CREEM_CONFIG.products.releasedMp3.link;
+    window.location.href = creemUrl;
   };
 
   // Admin Data Updaters
@@ -506,7 +472,7 @@ export default function App() {
                           </span>
                         </div>
                         <p className="text-xs text-emerald-200/80 mt-0.5">
-                          Never distributed, never released • <strong className="text-emerald-300 font-mono">WAV {CREEM_CONFIG.products.unreleasedWav.priceFormatted}</strong> • <strong className="text-amber-300 font-mono">10-Track Pack {CREEM_CONFIG.products.unreleasedPack10.priceFormatted}</strong> • <strong className="text-purple-300 font-mono">Permanent {CREEM_CONFIG.products.permanentLicense.priceFormatted}</strong>
+                          Never distributed, never released • <strong className="text-emerald-300 font-mono">WAV {CREEM_CONFIG.products.wavUnreleased.priceFormatted}</strong> • <strong className="text-amber-300 font-mono">10-Track Pack {CREEM_CONFIG.products.pack.priceFormatted}</strong> • <strong className="text-purple-300 font-mono">Permanent {CREEM_CONFIG.products.permanent.priceFormatted}</strong>
                         </p>
                       </div>
                     </div>
@@ -516,7 +482,7 @@ export default function App() {
                         onClick={() => handleOpenLicenses('unreleased')}
                         className="rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 px-3.5 py-2 text-xs font-bold transition-all cursor-pointer shrink-0"
                       >
-                        📄 Unreleased License ({CREEM_CONFIG.products.unreleasedWav.priceFormatted})
+                        📄 Unreleased License ({CREEM_CONFIG.products.wavUnreleased.priceFormatted})
                       </button>
                       <button
                         type="button"
@@ -563,7 +529,7 @@ export default function App() {
                           </span>
                         </div>
                         <p className="text-xs text-rose-200/80 mt-0.5">
-                          Already distributed tracks • <strong className="text-amber-300 font-mono">MP3 {CREEM_CONFIG.products.releasedMp3.priceFormatted}</strong> • <strong className="text-emerald-300 font-mono">WAV {CREEM_CONFIG.products.unreleasedWav.priceFormatted}</strong> • <strong className="text-amber-200 font-mono">10-Track Pack {CREEM_CONFIG.products.unreleasedPack10.priceFormatted}</strong> • <strong className="text-purple-300 font-mono">Permanent {CREEM_CONFIG.products.permanentLicense.priceFormatted}</strong>
+                          Already distributed tracks • <strong className="text-amber-300 font-mono">MP3 {CREEM_CONFIG.products.releasedMp3.priceFormatted}</strong> • <strong className="text-emerald-300 font-mono">WAV {CREEM_CONFIG.products.wavUnreleased.priceFormatted}</strong> • <strong className="text-amber-200 font-mono">10-Track Pack {CREEM_CONFIG.products.pack.priceFormatted}</strong> • <strong className="text-purple-300 font-mono">Permanent {CREEM_CONFIG.products.permanent.priceFormatted}</strong>
                         </p>
                       </div>
                     </div>
