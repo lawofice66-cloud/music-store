@@ -49,7 +49,7 @@ export const Footer: React.FC<FooterProps> = ({
     telegram: 'https://t.me/fallen75',
   };
 
-  const { releasedMp3, unreleasedWav, unreleasedPack10 } = CREEM_CONFIG.products;
+  const { releasedMp3, unreleasedWav, unreleasedPack10, exclusiveLicense } = CREEM_CONFIG.products;
 
   const copyEmail = () => {
     navigator.clipboard.writeText(contactEmail);
@@ -250,7 +250,7 @@ export const Footer: React.FC<FooterProps> = ({
                     onClick={onOpenLicenses}
                     className="hover:text-amber-400 transition-colors cursor-pointer text-left flex items-center gap-1 text-amber-300 font-bold"
                   >
-                    License Terms ({releasedMp3.priceFormatted} / {unreleasedWav.priceFormatted} / {unreleasedPack10.priceFormatted})
+                    License Terms ({releasedMp3.priceFormatted} / {unreleasedWav.priceFormatted} / {unreleasedPack10.priceFormatted} / {exclusiveLicense.priceFormatted})
                   </button>
                 </li>
               )}
@@ -292,10 +292,14 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
             </ul>
 
-            <div className="pt-2">
+            <div className="pt-2 space-y-1.5">
               <div className="flex items-center gap-1.5 text-[11px] text-neutral-400">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
                 <span>24-bit WAV &amp; MP3 delivery</span>
+              </div>
+              <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-800 text-[10px] font-mono text-neutral-400">
+                <span className="text-amber-400 font-bold">Google AI Studio</span>
+                <span>• App Platform</span>
               </div>
             </div>
           </div>

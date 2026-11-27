@@ -23,7 +23,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   orders,
 }) => {
   const pendingCount = orders.filter((o) => o.status === 'pending').length;
-  const { releasedMp3, unreleasedWav, unreleasedPack10 } = CREEM_CONFIG.products;
+  const { releasedMp3, unreleasedWav, unreleasedPack10, exclusiveLicense } = CREEM_CONFIG.products;
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-neutral-800/80 bg-[#090a0f]/90 backdrop-blur-md">
@@ -77,12 +77,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               id="nav-licenses-btn"
               onClick={onOpenLicenses}
               className="flex items-center gap-1.5 rounded-lg px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-semibold text-neutral-300 hover:text-amber-400 hover:bg-neutral-800/50 border border-neutral-800 transition-all cursor-pointer"
-              title={`View licenses (${releasedMp3.priceFormatted} / ${unreleasedWav.priceFormatted} / ${unreleasedPack10.priceFormatted})`}
+              title={`View licenses (${releasedMp3.priceFormatted} / ${unreleasedWav.priceFormatted} / ${unreleasedPack10.priceFormatted} / ${exclusiveLicense.priceFormatted})`}
             >
               <FileCode className="h-4 w-4 text-amber-400" />
               <span>Licenses</span>
               <span className="hidden md:inline text-[10px] text-amber-400 font-mono font-bold">
-                ({releasedMp3.priceFormatted} / {unreleasedWav.priceFormatted} / {unreleasedPack10.priceFormatted})
+                ({releasedMp3.priceFormatted} / {unreleasedWav.priceFormatted} / {unreleasedPack10.priceFormatted} / {exclusiveLicense.priceFormatted})
               </span>
             </button>
           )}

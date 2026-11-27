@@ -1,11 +1,11 @@
 // ============================================================================
 // fallen75.com - EDITABLE CREEM PAYMENT CONFIGURATION
-// Edit all 3 prices and all 3 Creem links here in one place.
+// Edit all 4 prices and all 4 Creem links here in one place.
 // ============================================================================
 
 export interface CreemProduct {
-  id: 'releasedMp3' | 'unreleasedWav' | 'unreleasedPack10';
-  status: 'RELEASED' | 'UNRELEASED';
+  id: 'releasedMp3' | 'unreleasedWav' | 'unreleasedPack10' | 'exclusiveLicense';
+  status: 'RELEASED' | 'UNRELEASED' | 'EXCLUSIVE';
   licenseName: string;
   price: number;
   priceFormatted: string;
@@ -52,11 +52,24 @@ export const CREEM_CONFIG = {
       description:
         '10 Unreleased beats - MP3 + 24-bit WAV. Never distributed, never released. Allowed per beat: 1 first streaming release on your name, 1 music video, social media. Not allowed: resale, commercial sync.',
     },
-  } as Record<'releasedMp3' | 'unreleasedWav' | 'unreleasedPack10', CreemProduct>,
+    exclusiveLicense: {
+      id: 'exclusiveLicense',
+      status: 'EXCLUSIVE',
+      licenseName: 'EXCLUSIVE RIGHTS - Full Ownership',
+      price: 49.0,
+      priceFormatted: '$49.00',
+      buttonText: 'Buy Exclusive - $49.00',
+      link: 'https://www.creem.io/payment/prod_5u3cTuuduQTUfXCIjzVzsl',
+      description:
+        'Exclusive rights - Full ownership, unlimited streaming, unlimited music videos, commercial sync, radio broadcast, beat removed from store permanently. MP3 + 24-bit WAV + Stems.',
+    },
+  } as Record<'releasedMp3' | 'unreleasedWav' | 'unreleasedPack10' | 'exclusiveLicense', CreemProduct>,
 };
 
 export const CREEM_PRODUCTS_LIST: CreemProduct[] = [
   CREEM_CONFIG.products.releasedMp3,
   CREEM_CONFIG.products.unreleasedWav,
   CREEM_CONFIG.products.unreleasedPack10,
+  CREEM_CONFIG.products.exclusiveLicense,
 ];
+

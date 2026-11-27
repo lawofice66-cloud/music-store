@@ -49,7 +49,7 @@ export const Hero: React.FC<HeroProps> = ({
   onOpenContact,
   onOpenLicenses,
 }) => {
-  const { releasedMp3, unreleasedWav, unreleasedPack10 } = CREEM_CONFIG.products;
+  const { releasedMp3, unreleasedWav, unreleasedPack10, exclusiveLicense } = CREEM_CONFIG.products;
 
   return (
     <section className="relative overflow-hidden border-b border-neutral-800/60 bg-gradient-to-b from-[#0e1017] via-[#090a0f] to-[#090a0f] pt-10 pb-8 px-4 sm:px-6">
@@ -80,7 +80,7 @@ export const Hero: React.FC<HeroProps> = ({
               >
                 <FileCode className="h-3.5 w-3.5 text-amber-400" />
                 <span>
-                  View Licenses ({releasedMp3.priceFormatted} / {unreleasedWav.priceFormatted} / {unreleasedPack10.priceFormatted})
+                  View Licenses ({releasedMp3.priceFormatted} / {unreleasedWav.priceFormatted} / {unreleasedPack10.priceFormatted} / {exclusiveLicense.priceFormatted})
                 </span>
               </button>
             )}

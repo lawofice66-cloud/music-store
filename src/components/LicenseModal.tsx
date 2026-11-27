@@ -16,7 +16,7 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
 
   if (!isOpen) return null;
 
-  const { releasedMp3, unreleasedWav, unreleasedPack10 } = CREEM_CONFIG.products;
+  const { releasedMp3, unreleasedWav, unreleasedPack10, exclusiveLicense } = CREEM_CONFIG.products;
 
   return (
     <div
@@ -26,7 +26,7 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="relative flex flex-col max-h-[92vh] w-full max-w-3xl overflow-hidden rounded-3xl border border-neutral-800 bg-[#0c0e17] shadow-2xl">
+      <div className="relative flex flex-col max-h-[92vh] w-full max-w-4xl overflow-hidden rounded-3xl border border-neutral-800 bg-[#0c0e17] shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-neutral-800/80 px-6 py-4 bg-[#0a0b12]">
           <div className="flex items-center gap-3">
@@ -62,7 +62,7 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
             }`}
           >
             <Sparkles className="h-3.5 w-3.5" />
-            <span>All 3 Licenses Comparison</span>
+            <span>All 4 Licenses Comparison</span>
           </button>
           <button
             onClick={() => setActiveTab('released')}
@@ -82,7 +82,7 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
                 : 'text-neutral-400 hover:text-white hover:bg-neutral-900/50'
             }`}
           >
-            <span>UNRELEASED WAV ({unreleasedWav.priceFormatted} / {unreleasedPack10.priceFormatted})</span>
+            <span>UNRELEASED &amp; EXCLUSIVE ({unreleasedWav.priceFormatted} - {exclusiveLicense.priceFormatted})</span>
           </button>
         </div>
 
@@ -91,10 +91,11 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
           {/* TAB 1: COMPARISON */}
           {activeTab === 'comparison' && (
             <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {CREEM_PRODUCTS_LIST.map((product) => {
                   const isReleased = product.id === 'releasedMp3';
                   const isWav = product.id === 'unreleasedWav';
+                  const isExclusive = product.id === 'exclusiveLicense';
                   return (
                     <div
                       key={product.id}
@@ -103,6 +104,8 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
                           ? 'border-rose-500/40 bg-rose-950/20'
                           : isWav
                           ? 'border-emerald-500/50 bg-emerald-950/25 shadow-lg shadow-emerald-950/30'
+                          : isExclusive
+                          ? 'border-purple-500/50 bg-purple-950/25 shadow-lg shadow-purple-950/30'
                           : 'border-amber-500/40 bg-amber-950/15'
                       }`}
                     >
@@ -112,6 +115,8 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
                             className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-extrabold border ${
                               isReleased
                                 ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                                : isExclusive
+                                ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
                                 : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
                             }`}
                           >
@@ -132,7 +137,9 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
                         target="_blank"
                         rel="noopener noreferrer"
                         className={`w-full inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-extrabold transition-all ${
-                          isWav
+                          isExclusive
+                            ? 'bg-purple-500 hover:bg-purple-400 text-black'
+                            : isWav
                             ? 'bg-emerald-500 hover:bg-emerald-400 text-black'
                             : isReleased
                             ? 'bg-amber-500 hover:bg-amber-400 text-black'
@@ -156,39 +163,38 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
                       <th className="p-3.5">Rights &amp; Features</th>
                       <th className="p-3.5 text-rose-300">MP3 ({releasedMp3.priceFormatted})</th>
                       <th className="p-3.5 text-emerald-300">WAV ({unreleasedWav.priceFormatted})</th>
-                      <th className="p-3.5 text-amber-300">10-Track Pack ({unreleasedPack10.priceFormatted})</th>
+                      <th className="p-3.5 text-amber-300">10-Pack ({unreleasedPack10.priceFormatted})</th>
+                      <th className="p-3.5 text-purple-300">Exclusive ({exclusiveLicense.priceFormatted})</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-800/80 font-medium">
                     <tr className="hover:bg-neutral-800/30">
                       <td className="p-3.5 font-bold text-white">Track Status</td>
-                      <td className="p-3.5 text-neutral-300">Released (Already distributed)</td>
-                      <td className="p-3.5 text-emerald-300">Unreleased (Never released)</td>
-                      <td className="p-3.5 text-emerald-300">10 Unreleased Beats</td>
+                      <td className="p-3.5 text-neutral-300">Released</td>
+                      <td className="p-3.5 text-emerald-300">Unreleased</td>
+                      <td className="p-3.5 text-amber-300">10 Beats</td>
+                      <td className="p-3.5 text-purple-300 font-bold">Exclusive Ownership</td>
                     </tr>
                     <tr className="hover:bg-neutral-800/30">
                       <td className="p-3.5 font-bold text-white">Audio Format</td>
                       <td className="p-3.5 text-neutral-300 font-mono">MP3</td>
-                      <td className="p-3.5 text-emerald-300 font-mono font-bold">24-bit WAV</td>
-                      <td className="p-3.5 text-amber-300 font-mono font-bold">MP3 + 24-bit WAV (x10)</td>
+                      <td className="p-3.5 text-emerald-300 font-mono">24-bit WAV</td>
+                      <td className="p-3.5 text-amber-300 font-mono">MP3 + WAV (x10)</td>
+                      <td className="p-3.5 text-purple-300 font-mono font-bold">MP3 + WAV + Stems</td>
                     </tr>
                     <tr className="hover:bg-neutral-800/30">
-                      <td className="p-3.5 font-bold text-white">Personal Use, Social Media, Parties, Personal Videos</td>
-                      <td className="p-3.5 text-emerald-400 font-bold">Allowed</td>
-                      <td className="p-3.5 text-emerald-400 font-bold">Allowed</td>
-                      <td className="p-3.5 text-emerald-400 font-bold">Allowed</td>
+                      <td className="p-3.5 font-bold text-white">Streaming &amp; Videos</td>
+                      <td className="p-3.5 text-rose-400 font-bold">No distribution</td>
+                      <td className="p-3.5 text-emerald-300 font-bold">1 Release + 1 Video</td>
+                      <td className="p-3.5 text-amber-300 font-bold">Per beat: 1 Release + 1 Video</td>
+                      <td className="p-3.5 text-purple-300 font-bold">Unlimited Streaming &amp; Videos</td>
                     </tr>
-                    <tr className="hover:bg-neutral-800/30">
-                      <td className="p-3.5 font-bold text-white">Streaming Release on Your Name &amp; Music Video</td>
-                      <td className="p-3.5 text-rose-400 font-bold">Not allowed (Re-distribution)</td>
-                      <td className="p-3.5 text-emerald-300 font-bold">1 Streaming Release + 1 Music Video</td>
-                      <td className="p-3.5 text-emerald-300 font-bold">Per beat: 1 First Streaming Release + 1 Music Video</td>
-                    </tr>
-                    <tr className="hover:bg-neutral-800/30 bg-rose-950/10">
-                      <td className="p-3.5 font-bold text-white">Resale / Commercial Sync</td>
-                      <td className="p-3.5 text-rose-400 font-bold">Not allowed</td>
-                      <td className="p-3.5 text-rose-400 font-bold">Not allowed</td>
-                      <td className="p-3.5 text-rose-400 font-bold">Not allowed</td>
+                    <tr className="hover:bg-neutral-800/30 bg-purple-950/10">
+                      <td className="p-3.5 font-bold text-white">Store Availability</td>
+                      <td className="p-3.5 text-neutral-300">Stays in store</td>
+                      <td className="p-3.5 text-neutral-300">Stays in store</td>
+                      <td className="p-3.5 text-neutral-300">Stays in store</td>
+                      <td className="p-3.5 text-purple-300 font-bold">Removed from store permanently</td>
                     </tr>
                   </tbody>
                 </table>
